@@ -14,6 +14,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(xilinx_firmware REQUIRED)
+find_package(xilinx_vitis REQUIRED)
 
 add_executable(member_function_publisher member_function_publisher.cpp)
 ament_target_dependencies(member_function_publisher rclcpp std_msgs)
