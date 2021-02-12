@@ -1,9 +1,17 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
-  <name>publisher_xilinx</name>
+  <name>accelerated_vadd_publisher</name>
   <version>0.1.0</version>
-  <description>A minimalistic publisher using a member function for evaluation purposes.</description>
+  <description>A trivial vector-add ROS 2 publisher that adds two 
+    inputs to a vector in a loop and publishes them on the go at 10 Hz. 
+    Vector add operations are offloaded into to the FPGA.    
+    
+    The offloading operation into the FPGA (or to the Programmable Logic (PL))
+    allows the publisher to meet its targeted rate (10 Hz). See "vadd_publisher"
+    for a version running purely on the CPUs which fails to maintain the publication
+    rate.
+  </description>
   <maintainer email="v.mayoralv@gmail.com">Víctor Mayoral Vilches</maintainer>
   <license>Apache License 2.0</license>
   <author email="v.mayoralv@gmail.com">Víctor Mayoral Vilches</author>
