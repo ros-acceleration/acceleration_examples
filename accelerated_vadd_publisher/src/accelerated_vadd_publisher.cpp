@@ -6,18 +6,28 @@
 //
 // Author: Víctor Mayoral Vilches <v.mayoralv@gmail.com>
 
+#define CL_HPP_CL_1_2_DEFAULT_BUILD
+#define CL_HPP_TARGET_OPENCL_VERSION 120
+#define CL_HPP_MINIMUM_OPENCL_VERSION 120
+#define CL_HPP_ENABLE_PROGRAM_CONSTRUCTION_FROM_ARRAY_COMPATIBILITY 1
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
+#define DATA_SIZE 4096  // 2**12
+// #define DATA_SIZE 65536  // 2**16
+// #define DATA_SIZE 262144  // 2**18
+
 #include <chrono>  // NOLINT
 #include <functional>
 #include <memory>
 #include <string>
+#include <vector>
+#include <iostream>
+#include <fstream>
+#include <CL/cl2.hpp>  // NOLINT
+#include <unistd.h>  // NOLINT
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "vadd.hpp"
-
-#define DATA_SIZE 4096  // 2**12
-// #define DATA_SIZE 65536  // 2**16
-// #define DATA_SIZE 262144  // 2**18
 
 using namespace std::chrono_literals;  // NOLINT
 
@@ -32,13 +42,13 @@ using namespace std::chrono_literals;  // NOLINT
  * @return false if failed
  */
 bool check_vadd(
-          const unsigned int *in1,  // Read-Only Vector 1
-          const unsigned int *in2,  // Read-Only Vector 2
-          const unsigned int *out   // Read-Only Result
+          const int *in1,  // Read-Only Vector 1
+          const int *in2,  // Read-Only Vector 2
+          const int *out   // Read-Only Result
     ) {
   bool match = true;
   for (int i = 0 ; i < DATA_SIZE ; i++) {
-      unsigned int expected = in1[i]+in2[i];
+      int expected = in1[i]+in2[i];
       if (out[i] != expected) {
           std::cout << "Error: Result mismatch" << std::endl;
           std::cout << "i = " << i << " CPU result = "

@@ -7,16 +7,28 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options(-Wall -Wextra -Wpedantic -Wno-unknown-pragmas)
 endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(OpenCL REQUIRED)
 
-add_executable(accelerated_vadd_publisher src/accelerated_vadd_publisher.cpp src/vadd.cpp)
+# accelerated_vadd_publisher
+add_executable(accelerated_vadd_publisher 
+  src/accelerated_vadd_publisher.cpp 
+  src/vadd.cpp
+)
 target_include_directories(accelerated_vadd_publisher PUBLIC include)
-ament_target_dependencies(accelerated_vadd_publisher rclcpp std_msgs)
+target_link_libraries(accelerated_vadd_publisher
+  ${OpenCL_LIBRARY}
+)
+ament_target_dependencies(accelerated_vadd_publisher 
+  rclcpp 
+  std_msgs
+)
 
 install(TARGETS
   accelerated_vadd_publisher

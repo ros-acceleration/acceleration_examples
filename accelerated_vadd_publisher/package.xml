@@ -23,11 +23,14 @@
   <build_depend>xilinx_firmware</build_depend>
   <build_depend>xilinx_vitis</build_depend>
   <build_depend>xilinx_vitis_hls</build_depend>
+  <build_depend>xilinx_xrt</build_depend>
+  <build_depend>xilinx_vivado</build_depend>
 
   <exec_depend>rclcpp</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>xilinx_firmware</exec_depend>
-  <build_depend>xilinx_vitis</build_depend>
+  <exec_depend>xilinx_vitis</exec_depend>
+  <exec_depend>xilinx_vitis_hls</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
