@@ -13,21 +13,33 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(std_msgs REQUIRED)
 find_package(OpenCL REQUIRED)
+find_package(ament_vitis)
 
 # accelerated_vadd_publisher
-add_executable(accelerated_vadd_publisher 
-  src/accelerated_vadd_publisher.cpp 
+add_executable(accelerated_vadd_publisher
+  src/accelerated_vadd_publisher.cpp
   src/vadd.cpp
 )
 target_include_directories(accelerated_vadd_publisher PUBLIC include)
 target_link_libraries(accelerated_vadd_publisher
   ${OpenCL_LIBRARY}
 )
-ament_target_dependencies(accelerated_vadd_publisher 
-  rclcpp 
+ament_target_dependencies(accelerated_vadd_publisher
+  rclcpp
   std_msgs
+)
+
+# vadd kernel
+vitis_acceleration_kernel(
+  NAME vadd
+  FILE src/vadd.cpp
+  CONFIG src/zcu102.cfg
+  INCLUDE
+    include
+  TYPE
+    hw_emu
+  PACKAGE
 )
 
 install(TARGETS

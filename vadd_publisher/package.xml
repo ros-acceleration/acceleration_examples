@@ -3,14 +3,14 @@
 <package format="2">
   <name>vadd_publisher</name>
   <version>0.1.0</version>
-  <description>A a trivial vector-add ROS 2 publisher. 
+  <description>A a trivial vector-add ROS 2 publisher.
     Adds two inputs to a vector in a loop and publishes on the go at
     10 Hz. An emulation of the target hardware shows that it's not
     able to meet the rate target and stays in between 2-4 Hz.
-    
-    The objective of this package is to generate a computationally expensive 
-    baseline when executed in a general purpose embedded CPU. See "accelerated_vadd_publisher" 
-    package for an optimized and accelerated_vadd_publisher version of the 
+
+    The objective of this package is to generate a computationally expensive
+    baseline when executed in a general purpose embedded CPU. See "accelerated_vadd_publisher"
+    package for an optimized and accelerated_vadd_publisher version of the
     same package which offloads the vector operations into an FPGA.
   </description>
   <maintainer email="v.mayoralv@gmail.com">Víctor Mayoral Vilches</maintainer>
@@ -22,13 +22,10 @@
   <build_depend>rclcpp</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>xilinx_firmware</build_depend>
-  <build_depend>xilinx_vitis</build_depend>
-  <build_depend>xilinx_vitis_hls</build_depend>
 
   <exec_depend>rclcpp</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>xilinx_firmware</exec_depend>
-  <build_depend>xilinx_vitis</build_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

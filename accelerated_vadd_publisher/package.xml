@@ -3,10 +3,10 @@
 <package format="2">
   <name>accelerated_vadd_publisher</name>
   <version>0.1.0</version>
-  <description>A trivial vector-add ROS 2 publisher that adds two 
-    inputs to a vector in a loop and publishes them on the go at 10 Hz. 
-    Vector add operations are offloaded into to the FPGA.    
-    
+  <description>A trivial vector-add ROS 2 publisher that adds two
+    inputs to a vector in a loop and publishes them on the go at 10 Hz.
+    Vector add operations are offloaded into to the FPGA.
+
     The offloading operation into the FPGA (or to the Programmable Logic (PL))
     allows the publisher to meet its targeted rate (10 Hz). See "vadd_publisher"
     for a version running purely on the CPUs which fails to maintain the publication
@@ -17,20 +17,15 @@
   <author email="v.mayoralv@gmail.com">Víctor Mayoral Vilches</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_vitis</buildtool_depend>
 
   <build_depend>rclcpp</build_depend>
   <build_depend>std_msgs</build_depend>
-  <build_depend>xilinx_firmware</build_depend>
-  <build_depend>xilinx_vitis</build_depend>
-  <build_depend>xilinx_vitis_hls</build_depend>
-  <build_depend>xilinx_xrt</build_depend>
-  <build_depend>xilinx_vivado</build_depend>
+  <!-- <build_depend>xilinx_firmware</build_depend> -->
 
   <exec_depend>rclcpp</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>xilinx_firmware</exec_depend>
-  <exec_depend>xilinx_vitis</exec_depend>
-  <exec_depend>xilinx_vitis_hls</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

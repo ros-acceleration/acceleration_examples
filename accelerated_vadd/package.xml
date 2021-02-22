@@ -1,21 +1,26 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
-  <name>publisher_xilinx</name>
+  <name>accelerated_vadd</name>
   <version>0.1.0</version>
-  <description>A minimalistic publisher using a member function for evaluation purposes.</description>
+  <description>A trivial vector-add example (NO ROS USED) that serves
+    as a baseline for development and debugging. The computation
+    sends two integer vectors and adds them.
+
+    Vector add operations are offloaded into to the FPGA. The offloading
+    operation into the FPGA (or to the Programmable Logic (PL)).
+  </description>
   <maintainer email="v.mayoralv@gmail.com">Víctor Mayoral Vilches</maintainer>
   <license>Apache License 2.0</license>
   <author email="v.mayoralv@gmail.com">Víctor Mayoral Vilches</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_depend>rclcpp</build_depend>
-  <build_depend>std_msgs</build_depend>
+  <build_depend>xilinx_firmware</build_depend>
+  <build_depend>xilinx_xrt</build_depend>
 
-  <exec_depend>rclcpp</exec_depend>
-  <exec_depend>std_msgs</exec_depend>
-  
+  <exec_depend>xilinx_firmware</exec_depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 

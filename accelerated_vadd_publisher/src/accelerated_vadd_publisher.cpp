@@ -11,8 +11,8 @@
 #define CL_HPP_MINIMUM_OPENCL_VERSION 120
 #define CL_HPP_ENABLE_PROGRAM_CONSTRUCTION_FROM_ARRAY_COMPATIBILITY 1
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
-#define DATA_SIZE 4096  // 2**12
-// #define DATA_SIZE 65536  // 2**16
+// #define DATA_SIZE 4096  // 2**12
+#define DATA_SIZE 65536  // 2**16
 // #define DATA_SIZE 262144  // 2**18
 
 #include <chrono>  // NOLINT
@@ -34,7 +34,7 @@ using namespace std::chrono_literals;  // NOLINT
 /**
  * @brief Check that the vector add operation
  *      was successfully computed, either in PL or PS.
- * 
+ *
  * @param in1 summatory operand 1
  * @param in2 summatory operand 1
  * @param out result of the summatory
@@ -62,8 +62,8 @@ bool check_vadd(
 
 /**
  * @brief Get the xilinx devices object
- * 
- * @return std::vector<cl::Device> 
+ *
+ * @return std::vector<cl::Device>
  */
 std::vector<cl::Device> get_xilinx_devices() {
     size_t i;
@@ -92,7 +92,7 @@ std::vector<cl::Device> get_xilinx_devices() {
 
 /**
  * @brief function to process the accelerated kernel and prepare it for use
- * 
+ *
  * @param xclbin_file_name the accelerated kernel binary
  * @param nb number of bytes
  * @return char* pointer to the loaded kernel
@@ -121,8 +121,8 @@ char* read_binary_file(const std::string &xclbin_file_name, unsigned &nb) {  // 
 int main(int argc, char * argv[]) {
   // ROS 2 abstractions
   rclcpp::init(argc, argv);
-  auto node = rclcpp::Node::make_shared("vadd_publisher");
-  auto publisher = node->create_publisher<std_msgs::msg::String>("vector", 10);
+  auto node = rclcpp::Node::make_shared("accelerated_vadd_publisher");
+  auto publisher = node->create_publisher<std_msgs::msg::String>("vector_acceleration", 10);
   auto publish_count = 0;
   std_msgs::msg::String message;
   rclcpp::WallRate loop_rate(100ms);
@@ -163,7 +163,7 @@ int main(int argc, char * argv[]) {
   // Map host-side buffer memory to user-space pointers
   int *in1 = (int *)q.enqueueMapBuffer(in1_buf, CL_TRUE, CL_MAP_WRITE, 0, sizeof(int) * DATA_SIZE);  // NOLINT
   int *in2 = (int *)q.enqueueMapBuffer(in2_buf, CL_TRUE, CL_MAP_WRITE, 0, sizeof(int) * DATA_SIZE);  // NOLINT
-  int *out = (int *)q.enqueueMapBuffer(out_buf, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, sizeof(int) * DATA_SIZE);  // NOLINT  
+  int *out = (int *)q.enqueueMapBuffer(out_buf, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, sizeof(int) * DATA_SIZE);  // NOLINT
 
   // ------------------------------------------------------------------------
   // Step 3: Main loop, set kernel arguments, schedule transfer
