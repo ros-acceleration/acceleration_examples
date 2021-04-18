@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(accelerated_vadd_publisher)
+project(accelerated_vadd_publisher_once)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)

@@ -1,11 +1,14 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
-  <name>accelerated_vadd_publisher</name>
+  <name>accelerated_vadd_publisher_once</name>
   <version>0.1.0</version>
   <description>A trivial vector-add ROS 2 publisher that adds two
-    inputs to a vector in a loop and publishes them on the go at 10 Hz.
-    Vector add operations are offloaded into to the FPGA.
+    inputs to a vector and publishes only once. Vector add operations
+    are offloaded into to the FPGA.
+
+    This example is meant only for FPGA-evaluation purposes. See
+    "accelerated_vadd_publisher" for a publisher that continuously publishes.
 
     The offloading operation into the FPGA (or to the Programmable Logic (PL))
     allows the publisher to meet its targeted rate (10 Hz). See "vadd_publisher"

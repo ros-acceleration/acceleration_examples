@@ -16,8 +16,8 @@
 #include "vadd.hpp"
 
 // #define DATA_SIZE 4096  // 2**12
-#define DATA_SIZE 65536  // 2**16
-// #define DATA_SIZE 262144  // 2**18
+// #define DATA_SIZE 65536  // 2**16
+#define DATA_SIZE 262144  // 2**18
 
 using namespace std::chrono_literals;  // NOLINT
 

@@ -12,8 +12,8 @@
 #define CL_HPP_ENABLE_PROGRAM_CONSTRUCTION_FROM_ARRAY_COMPATIBILITY 1
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 // #define DATA_SIZE 4096  // 2**12
-// #define DATA_SIZE 65536  // 2**16
-#define DATA_SIZE 262144  // 2**18
+#define DATA_SIZE 65536  // 2**16
+// #define DATA_SIZE 262144  // 2**18
 
 #include <chrono>  // NOLINT
 #include <functional>
@@ -125,7 +125,6 @@ int main(int argc, char * argv[]) {
   auto publisher = node->create_publisher<std_msgs::msg::String>("vector_acceleration", 10);
   auto publish_count = 0;
   std_msgs::msg::String message;
-  rclcpp::WallRate loop_rate(100ms);
 
   // ------------------------------------------------------------------------
   // Step 1: Initialize the OpenCL environment for acceleration
@@ -166,51 +165,49 @@ int main(int argc, char * argv[]) {
   int *out = (int *)q.enqueueMapBuffer(out_buf, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, sizeof(int) * DATA_SIZE);  // NOLINT
 
   // ------------------------------------------------------------------------
-  // Step 3: Main loop, set kernel arguments, schedule transfer
+  // Step 3: Publish once, set kernel arguments, schedule transfer
   //  of memory to kernel, run kernel and transfer memory back from it
   // ------------------------------------------------------------------------
-  while (rclcpp::ok()) {
-    // randomize the vectors used
-    for (int i = 0 ; i < DATA_SIZE ; i++) {
-        in1[i] = rand() % DATA_SIZE;  // NOLINT
-        in2[i] = rand() % DATA_SIZE;  // NOLINT
-        out[i] = 0;
-    }
-
-    // Set kernel arguments
-    krnl_vector_add.setArg(0, in1_buf);
-    krnl_vector_add.setArg(1, in2_buf);
-    krnl_vector_add.setArg(2, out_buf);
-    krnl_vector_add.setArg(3, DATA_SIZE);
-
-    // Schedule transfer of inputs to device memory
-    q.enqueueMigrateMemObjects({in1_buf, in2_buf}, 0 /* 0 means from host*/);
-    // execution of kernel
-    q.enqueueTask(krnl_vector_add);
-    // transfer of outputs back to host memory
-    q.enqueueMigrateMemObjects({out_buf}, CL_MIGRATE_MEM_OBJECT_HOST);
-    // Wait for all scheduled operations to finish
-    q.finish();
-
-    // Validate operation in the PS
-    check_vadd(in1, in2, out);
-
-    // Publish publish result
-    message.data = "vadd finished, iteration: " +
-      std::to_string(publish_count++);
-    RCLCPP_INFO(node->get_logger(), "Publishing: '%s'", message.data.c_str());
-
-    try {
-      publisher->publish(message);
-      rclcpp::spin_some(node);
-    } catch (const rclcpp::exceptions::RCLError & e) {
-      RCLCPP_ERROR(
-        node->get_logger(),
-        "unexpectedly failed with %s",
-        e.what());
-    }
-    loop_rate.sleep();
+  // randomize the vectors used
+  for (int i = 0 ; i < DATA_SIZE ; i++) {
+      in1[i] = rand() % DATA_SIZE;  // NOLINT
+      in2[i] = rand() % DATA_SIZE;  // NOLINT
+      out[i] = 0;
   }
+
+  // Set kernel arguments
+  krnl_vector_add.setArg(0, in1_buf);
+  krnl_vector_add.setArg(1, in2_buf);
+  krnl_vector_add.setArg(2, out_buf);
+  krnl_vector_add.setArg(3, DATA_SIZE);
+
+  // Schedule transfer of inputs to device memory
+  q.enqueueMigrateMemObjects({in1_buf, in2_buf}, 0 /* 0 means from host*/);
+  // execution of kernel
+  q.enqueueTask(krnl_vector_add);
+  // transfer of outputs back to host memory
+  q.enqueueMigrateMemObjects({out_buf}, CL_MIGRATE_MEM_OBJECT_HOST);
+  // Wait for all scheduled operations to finish
+  q.finish();
+
+  // Validate operation in the PS
+  check_vadd(in1, in2, out);
+
+  // Publish publish result
+  message.data = "vadd finished, iteration: " +
+    std::to_string(publish_count++);
+  RCLCPP_INFO(node->get_logger(), "Publishing: '%s'", message.data.c_str());
+
+  try {
+    publisher->publish(message);
+    rclcpp::spin_some(node);
+  } catch (const rclcpp::exceptions::RCLError & e) {
+    RCLCPP_ERROR(
+      node->get_logger(),
+      "unexpectedly failed with %s",
+      e.what());
+  }
+
   rclcpp::shutdown();
   delete[] fileBuf;  // release memory from the acceleration kernel
 

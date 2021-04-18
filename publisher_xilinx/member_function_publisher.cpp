@@ -1,7 +1,7 @@
 // Copyright (c) 2021, Xilinx®.
 // All rights reserved
 //
-// Author: Víctor Mayoral Vilches <v.mayoralv@gmail.com>
+// Author: Víctor Mayoral Vilches <victorma@xilinx.com>
 
 #include <chrono>
 #include <functional>

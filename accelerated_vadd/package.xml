@@ -10,9 +10,9 @@
     Vector add operations are offloaded into to the FPGA. The offloading
     operation into the FPGA (or to the Programmable Logic (PL)).
   </description>
-  <maintainer email="v.mayoralv@gmail.com">Víctor Mayoral Vilches</maintainer>
+  <maintainer email="victorma@xilinx.com">Víctor Mayoral Vilches</maintainer>
   <license>Apache License 2.0</license>
-  <author email="v.mayoralv@gmail.com">Víctor Mayoral Vilches</author>
+  <author email="victorma@xilinx.com">Víctor Mayoral Vilches</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

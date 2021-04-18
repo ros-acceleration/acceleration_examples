@@ -13,9 +13,9 @@
     package for an optimized and accelerated_vadd_publisher version of the
     same package which offloads the vector operations into an FPGA.
   </description>
-  <maintainer email="v.mayoralv@gmail.com">Víctor Mayoral Vilches</maintainer>
+  <maintainer email="victorma@xilinx.com">Víctor Mayoral Vilches</maintainer>
   <license>Apache License 2.0</license>
-  <author email="v.mayoralv@gmail.com">Víctor Mayoral Vilches</author>
+  <author email="victorma@xilinx.com">Víctor Mayoral Vilches</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
