@@ -11,9 +11,11 @@
 #define CL_HPP_MINIMUM_OPENCL_VERSION 120
 #define CL_HPP_ENABLE_PROGRAM_CONSTRUCTION_FROM_ARRAY_COMPATIBILITY 1
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
+
 // #define DATA_SIZE 4096  // 2**12
+#define DATA_SIZE 16384  // 2**14
 // #define DATA_SIZE 65536  // 2**16
-#define DATA_SIZE 262144  // 2**18
+// #define DATA_SIZE 262144  // 2**18
 
 #include <chrono>  // NOLINT
 #include <functional>
@@ -48,7 +50,7 @@ bool check_vadd(
     ) {
   bool match = true;
   for (int i = 0 ; i < DATA_SIZE ; i++) {
-      int expected = in1[i]+in2[i];
+      int expected = in1[i] + in2[i];
       if (out[i] != expected) {
           std::cout << "Error: Result mismatch" << std::endl;
           std::cout << "i = " << i << " CPU result = "

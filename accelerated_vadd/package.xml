@@ -15,10 +15,9 @@
   <author email="victorma@xilinx.com">Víctor Mayoral Vilches</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_vitis</buildtool_depend>  
 
   <build_depend>xilinx_firmware</build_depend>
-  <build_depend>xilinx_xrt</build_depend>
-
   <exec_depend>xilinx_firmware</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>

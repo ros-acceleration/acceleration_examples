@@ -16,8 +16,9 @@
 #include "vadd.hpp"
 
 // #define DATA_SIZE 4096  // 2**12
+#define DATA_SIZE 16384  // 2**14
 // #define DATA_SIZE 65536  // 2**16
-#define DATA_SIZE 262144  // 2**18
+// #define DATA_SIZE 262144  // 2**18
 
 using namespace std::chrono_literals;  // NOLINT
 
@@ -27,6 +28,7 @@ bool check_vadd(
           const unsigned int *out   // Read-Only Result
     ) {
   bool match = true;
+  // no need to iterate twice through the loop, math's the same
   for (int i = 0 ; i < DATA_SIZE ; i++) {
       unsigned int expected = in1[i]+in2[i];
       if (out[i] != expected) {

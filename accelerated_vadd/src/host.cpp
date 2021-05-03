@@ -21,6 +21,7 @@
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 
 #define DATA_SIZE 4096  // 2**12
+// #define DATA_SIZE 16384  // 2**14
 // #define DATA_SIZE 65536  // 2**16
 // #define DATA_SIZE 262144  // 2**18
 

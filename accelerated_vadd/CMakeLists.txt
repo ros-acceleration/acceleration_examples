@@ -12,6 +12,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(OpenCL REQUIRED)
+find_package(ament_vitis)
 
 # accelerated_vadd
 add_executable(accelerated_vadd
@@ -19,6 +20,20 @@ add_executable(accelerated_vadd
 )
 target_link_libraries(accelerated_vadd
   ${OpenCL_LIBRARY}
+)
+
+# vadd kernel
+vitis_acceleration_kernel(
+  NAME vadd
+  FILE src/vadd.cpp
+  CONFIG src/zcu102.cfg
+  INCLUDE
+    include
+  TYPE
+    sw_emu
+    # hw_emu
+    # hw
+  PACKAGE
 )
 
 install(TARGETS

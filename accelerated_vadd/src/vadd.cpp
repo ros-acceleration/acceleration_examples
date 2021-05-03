@@ -28,8 +28,7 @@ extern "C" {
 
 	    for(int i = 0; i < size; ++i)
 	    {
-	        out[i] = in1[i] + in2[i]*2;
+	        out[i] = in1[i] + in2[i];
 	    }
 	}
 }
-
