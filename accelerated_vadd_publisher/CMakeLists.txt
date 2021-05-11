@@ -14,6 +14,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(OpenCL REQUIRED)
+find_package(Threads REQUIRED)
 find_package(ament_vitis)
 
 # accelerated_vadd_publisher
@@ -24,6 +25,7 @@ add_executable(accelerated_vadd_publisher
 target_include_directories(accelerated_vadd_publisher PUBLIC include)
 target_link_libraries(accelerated_vadd_publisher
   ${OpenCL_LIBRARY}
+  pthread
 )
 ament_target_dependencies(accelerated_vadd_publisher
   rclcpp
@@ -39,8 +41,8 @@ vitis_acceleration_kernel(
     include
   TYPE
     sw_emu
-    hw_emu
-    hw
+    # hw_emu
+    # hw
   PACKAGE
 )
 

@@ -109,7 +109,7 @@ int main(int argc, char** argv)
             std::cout << "Error: Result mismatch" << std::endl;
             std::cout << "i = " << i << " CPU result = " << expected << " Device result = " << out[i] << std::endl;
             match = false;
-            break;
+            // break;
         }
     }
 

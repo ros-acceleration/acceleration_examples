@@ -12,6 +12,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(OpenCL REQUIRED)
+find_package(Threads REQUIRED)
 find_package(ament_vitis)
 
 # accelerated_vadd
@@ -20,6 +21,7 @@ add_executable(accelerated_vadd
 )
 target_link_libraries(accelerated_vadd
   ${OpenCL_LIBRARY}
+  pthread
 )
 
 # vadd kernel
@@ -30,9 +32,9 @@ vitis_acceleration_kernel(
   INCLUDE
     include
   TYPE
-    sw_emu
+    # sw_emu
     # hw_emu
-    # hw
+    hw
   PACKAGE
 )
 
