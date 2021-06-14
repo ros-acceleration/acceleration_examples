@@ -40,9 +40,9 @@ ament_target_dependencies(accelerated_vadd_publisher_once
 #   INCLUDE
 #     include
 #   TYPE
-#     sw_emu
+#     # sw_emu
 #     # hw_emu
-#     # hw
+#     hw
 #   PACKAGE
 # )
 

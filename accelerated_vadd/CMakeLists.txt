@@ -28,13 +28,13 @@ target_link_libraries(accelerated_vadd
 vitis_acceleration_kernel(
   NAME vadd
   FILE src/vadd.cpp
-  CONFIG src/zcu102.cfg
+  CONFIG src/kv260.cfg
   INCLUDE
     include
   TYPE
-    # sw_emu
+    sw_emu
     # hw_emu
-    hw
+    # hw
   PACKAGE
 )
 

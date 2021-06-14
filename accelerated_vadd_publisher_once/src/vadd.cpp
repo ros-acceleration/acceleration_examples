@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#define TEST_DATA_SIZE 256
-const unsigned int c_dim = TEST_DATA_SIZE;
-
 // extern "C" {
 //     void vadd(
 //             const unsigned int *in1,  // Read-Only Vector 1
@@ -29,8 +26,6 @@ const unsigned int c_dim = TEST_DATA_SIZE;
 // #pragma HLS INTERFACE m_axi port=in2 bundle=aximm2
 // #pragma HLS INTERFACE m_axi port=out bundle=aximm1
 //         for (int i = 0; i < size; ++i) {
-// //			#pragma HLS PIPELINE II=1
-// //			#pragma HLS LOOP_TRIPCOUNT min=c_dim max=c_dim
 //             out[i] = in1[i] + in2[i];
 //         }
 //     }
