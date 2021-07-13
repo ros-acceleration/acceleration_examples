@@ -5,7 +5,7 @@
 |---|---------|-------------|---------------------|
 | ![](https://pkumarsblog.files.wordpress.com/2016/04/ball_trajectory.png?w=1200&h=800&crop=1) | [`vadd_publisher`](vadd_publisher) | A trivial vector-add ROS 2 publisher which adds two vectors in a loop and attempts publishing the result at 10 Hz. Unfortunately, the computations of adding the vectors is not able to meet the rate target and stays in between 2-4 Hz. *The objective of this package is to generate a computationally expensive baseline when executed in a general purpose embedded CPU. See `accelerated_vadd_publisher` package for an optimized and version of the same package which offloads the vector add operations into an FPGA*| None |
 | ![](https://pkumarsblog.files.wordpress.com/2016/04/ball_trajectory.png?w=1200&h=800&crop=1) | [`accelerated_vadd_publisher`](accelerated_vadd_publisher)| An accelerated version of the trivial vector-add ROS 2 publisher which adds two inputs to a vector in a loop and publishes them at 10 Hz. Vector add operations are offloaded into to the FPGA. The offloading operation into the FPGA allows the publisher to meet its targeted rate (10 Hz). |
-
+| ![](https://pkumarsblog.files.wordpress.com/2016/04/ball_trajectory.png?w=1200&h=800&crop=1) | [`accelerated_vadd_publisher_once`](accelerated_vadd_publisher_once)| Similar to `accelerated_vadd_publisher`, a trivial vector-add ROS 2 publisher that adds two inputs and relies on the same acceleration kernel yet *it publishes only once*. | [Yes](accelerated_vadd_publisher_once/src/vadd.cpp) |
 
 <details><summary>Legacy FPGA examples</summary>
 
@@ -18,7 +18,9 @@
 #### Simple acceleration
 | package | description | acceleration kernel |
 |---------|-------------|---------------------|
-|[`accelerated_vadd`](accelerated_vadd)| A a trivial vector-add example. No ROS interaction, just a simple addition of two inputs to a vector while in a loop. Prepared to be built as a ROS package. | Yes |
+|[`accelerated_vadd`](accelerated_vadd)| A a trivial vector-add example. No interactions with the ROS computational graph, just a simple addition of two inputs to a vector while in a loop. Prepared to be built as a ROS package. | Yes |
+|[`simple_adder`](simple_adder)| A trivial adder example. No interactions with the ROS computational graph. Meant to demonstrate how HLS is integrated into build ROS 2 flows. | Yes |
+
 
 #### Simple ROS
 | package | description | acceleration kernel |

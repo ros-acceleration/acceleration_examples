@@ -11,13 +11,15 @@
     The objective of this package is to generate a computationally expensive
     baseline when executed in a general purpose embedded CPU. See "accelerated_vadd_publisher"
     package for an optimized and accelerated_vadd_publisher version of the
-    same package which offloads the vector operations into an FPGA.
+    same package which offloads the vector operations into an FPGA. See 
+    "faster_vadd_publisher" for an even more optimized version.
   </description>
   <maintainer email="victorma@xilinx.com">Víctor Mayoral Vilches</maintainer>
   <license>Apache License 2.0</license>
   <author email="victorma@xilinx.com">Víctor Mayoral Vilches</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_vitis</buildtool_depend>
 
   <build_depend>rclcpp</build_depend>
   <build_depend>std_msgs</build_depend>

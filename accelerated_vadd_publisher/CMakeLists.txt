@@ -32,19 +32,37 @@ ament_target_dependencies(accelerated_vadd_publisher
   std_msgs
 )
 
-# vadd kernel
-vitis_acceleration_kernel(
-  NAME vadd
-  FILE src/vadd.cpp
-  CONFIG src/zcu102.cfg
-  INCLUDE
+# C simulation and synthesis
+vitis_hls_generate_tcl(
+  PROJECT 
+    project_accelerated_vadd_publisher
+  SRC 
+    src/vadd.cpp
+  HEADERS
     include
-  TYPE
-    sw_emu
-    # hw_emu
-    # hw
-  PACKAGE
+  TESTBENCH 
+    src/testbench.cpp
+  TOPFUNCTION 
+    vadd
+  CLOCK 
+    4
+  SYNTHESIS
 )
+
+
+# # vadd kernel
+# vitis_acceleration_kernel(
+#   NAME vadd
+#   FILE src/vadd.cpp
+#   CONFIG src/zcu102.cfg
+#   INCLUDE
+#     include
+#   TYPE
+#     sw_emu
+#     # hw_emu
+#     # hw
+#   PACKAGE
+# )
 
 install(TARGETS
   accelerated_vadd_publisher

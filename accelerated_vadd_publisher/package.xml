@@ -4,13 +4,30 @@
   <name>accelerated_vadd_publisher</name>
   <version>0.1.0</version>
   <description>A trivial vector-add ROS 2 publisher that adds two
-    inputs to a vector in a loop and publishes them on the go at 10 Hz.
-    Vector add operations are offloaded into to the FPGA.
+    inputs to a vector in a loop and attempts to publish them on the go 
+    at 10 Hz. Vector add operations are offloaded into to the FPGA.
+
+    This example builds on top of "vadd_publisher" which is only able to
+    publish at 2 Hz on the quad-core Cortex-A53 Application Processing 
+    Units (APUs) of the Zynq Ultrascale+ (ZU+) SoC.
 
     The offloading operation into the FPGA (or to the Programmable Logic (PL))
-    allows the publisher to meet its targeted rate (10 Hz). See "vadd_publisher"
-    for a version running purely on the CPUs which fails to maintain the publication
-    rate.
+    allows the publisher to improve its publishing rate from 2 Hz, up to 6 Hz.
+    For that, the HLS INTERFACE pragma is used. The HLS INTERFACE specifies 
+    how RTL ports are created from the function definition during interface 
+    synthesis. Sharing ports helps save FPGA resources by eliminating AXI 
+    interfaces, but it can limit the performance of the kernel because all the 
+    memory transfers have to go through a single port. The m_axi port has 
+    independent READ and WRITE channels, so with a single m_axi port, we can do 
+    reads and writes simultaneously but since the kernel (vadd) has two vectors 
+    from where its reading (simultaneously), we can optimize the dataflows by 
+    simply asking for an extra AXI interface.
+    
+    After using the PL, accelerated_vadd_publisher is able to publish at 6 Hz in 
+    the ZU+, still far from its targeted rate (10 Hz). See "vadd_publisher"
+    for a version running purely on the APUs (2 Hz). See "faster_vadd_publisher" 
+    for yet another version of this publisher which further leverages HLS pragmas 
+    to meet the targeted rate (10 Hz).
   </description>
   <maintainer email="victorma@xilinx.com">Víctor Mayoral Vilches</maintainer>
   <license>Apache License 2.0</license>

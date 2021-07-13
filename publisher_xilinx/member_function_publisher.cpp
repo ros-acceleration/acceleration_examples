@@ -1,7 +1,15 @@
-// Copyright (c) 2021, Xilinx®.
-// All rights reserved
-//
-// Author: Víctor Mayoral Vilches <victorma@xilinx.com>
+/*
+      ____  ____
+     /   /\/   /
+    /___/  \  /   Copyright (c) 2021, Xilinx®.
+    \   \   \/    Author: Víctor Mayoral Vilches <victorma@xilinx.com>
+     \   \
+     /   /
+    /___/   /\
+    \   \  /  \
+     \___\/\___\
+
+*/
 
 #include <chrono>
 #include <functional>

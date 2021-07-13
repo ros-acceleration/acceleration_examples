@@ -1,10 +1,17 @@
-// Copyright (c) 2021, Xilinx®.
-// All rights reserved
-//
-// Inspired by the Vector-Add example.
-// See https://github.com/Xilinx/Vitis-Tutorials/blob/master/Getting_Started/Vitis
-//
-// Author: Víctor Mayoral Vilches <v.mayoralv@gmail.com>
+/*
+      ____  ____
+     /   /\/   /
+    /___/  \  /   Copyright (c) 2021, Xilinx®.
+    \   \   \/    Author: Víctor Mayoral Vilches <victorma@xilinx.com>
+     \   \
+     /   /
+    /___/   /\
+    \   \  /  \
+     \___\/\___\
+
+Inspired by the Vector-Add example.
+See https://github.com/Xilinx/Vitis-Tutorials/blob/master/Getting_Started/Vitis
+*/
 
 #include <chrono>  // NOLINT
 #include <functional>
