@@ -17,7 +17,18 @@ find_package(OpenCL REQUIRED)
 find_package(Threads REQUIRED)
 find_package(ament_vitis)
 
-# accelerated_vadd_publisher
+# faster_vadd
+add_executable(faster_vadd
+  src/faster_vadd.cpp
+  # src/vadd.cpp
+)
+target_include_directories(faster_vadd PUBLIC include)
+target_link_libraries(faster_vadd
+  ${OpenCL_LIBRARY}
+  pthread
+)
+
+# faster_vadd_publisher
 add_executable(faster_vadd_publisher
   src/faster_vadd_publisher.cpp
   # src/vadd.cpp
@@ -46,26 +57,29 @@ vitis_hls_generate_tcl(
     vadd
   CLOCK 
     4
-  SYNTHESIS
+  SYNTHESIS  
 )
 
-# vadd kernel
-vitis_acceleration_kernel(
-  NAME vadd
-  FILE src/vadd.cpp
-  CONFIG src/zcu102.cfg
-  INCLUDE
-    include
-  TYPE
-    sw_emu
-    hw_emu
-    hw
-  PACKAGE
-)
+# # vadd kernel
+# vitis_acceleration_kernel(
+#   NAME vadd
+#   FILE src/vadd.cpp
+#   CONFIG src/zcu102.cfg
+#   INCLUDE
+#     include
+#   TYPE
+#     sw_emu
+#     hw_emu
+#     hw
+#   PACKAGE
+# )
 
-install(TARGETS
-  faster_vadd_publisher
-  DESTINATION lib/${PROJECT_NAME}
+install(
+  TARGETS
+    faster_vadd
+    faster_vadd_publisher
+  DESTINATION 
+    lib/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)

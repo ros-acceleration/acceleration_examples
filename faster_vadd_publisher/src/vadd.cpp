@@ -60,10 +60,11 @@ Input Vector 2 from Global Memory --->|             |      |__|
 #include <hls_stream.h>
 #include "assert.h"
 
-#define DATA_SIZE 4096
+// #define DATA_SIZE 4096
+#define DATA_SIZE 512
 
 // TRIPCOUNT identifier
-const int c_size = DATA_SIZE / 16;
+const int c_size = DATA_SIZE;
 
 static void load_input(hls::vector<unsigned int, 16>* in,
                        hls::stream<hls::vector<unsigned int, 16> >& inStream,

@@ -63,7 +63,7 @@ Input Vector 2 from Global Memory --->|             |      |__|
 #define DATA_SIZE 4096
 
 // TRIPCOUNT identifier
-const int c_size = DATA_SIZE;
+const int c_size = DATA_SIZE / 16;
 
 static void load_input(hls::vector<unsigned int, 16>* in,
                        hls::stream<hls::vector<unsigned int, 16> >& inStream,
@@ -85,9 +85,10 @@ static void compute_add(hls::stream<hls::vector<unsigned int, 16> >& in1_stream,
 execute2:
     for (int j = 0; j < vSize; ++j) {  // stupidly iterate over
                                         // it to generate load
+    #pragma HLS LOOP_TRIPCOUNT min = c_size max = c_size
     execute:
         for (int i = 0; i < vSize; i++) {
-    #pragma HLS LOOP_TRIPCOUNT min = c_size max = c_size
+        #pragma HLS LOOP_TRIPCOUNT min = c_size max = c_size
             out_stream << (in1_stream.read() + in2_stream.read());
         }
     }

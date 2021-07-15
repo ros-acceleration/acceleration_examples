@@ -20,19 +20,20 @@ See https://github.com/Xilinx/Vitis-Tutorials/blob/master/Getting_Started/Vitis
 
 #include "vadd.hpp"
 
-#define DATA_SIZE 4096  // 2**12
+#define DATA_SIZE 512
+// #define DATA_SIZE 4096  // 2**12
 // #define DATA_SIZE 16384  // 2**14
 // #define DATA_SIZE 65536  // 2**16
 // #define DATA_SIZE 262144  // 2**18
 
 // using namespace std::chrono_literals;  // NOLINT
 
-bool check_vadd(
+int check_vadd(
           const unsigned int *in1,  // Read-Only Vector 1
           const unsigned int *in2,  // Read-Only Vector 2
           const unsigned int *out   // Read-Only Result
     ) {
-  bool match = true;
+  // bool match = true;
   // no need to iterate twice through the loop, math's the same
   for (int i = 0 ; i < DATA_SIZE ; i++) {
       unsigned int expected = in1[i]+in2[i];
@@ -40,11 +41,13 @@ bool check_vadd(
           // std::cout << "Error: Result mismatch" << std::endl;
           // std::cout << "i = " << i << " CPU result = "
           //   << expected << " Device result = " << out[i] << std::endl;
-          match = false;
-          break;
+          // match = false;
+          // break;
+          return out[i] - expected;
       }
   }
-  return match;
+  return 0;
+  // return match;
 }
 
 int main(int argc, char * argv[]) {
@@ -65,7 +68,5 @@ int main(int argc, char * argv[]) {
   vadd(in1, in2, out, DATA_SIZE);  // function subject to be accelerated
 
   // Validate operation
-  check_vadd(in1, in2, out);
-
-  return 0;
+  return check_vadd(in1, in2, out);
 }

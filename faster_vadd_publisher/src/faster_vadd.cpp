@@ -28,8 +28,6 @@
 #include <CL/cl2.hpp>  // NOLINT
 #include <unistd.h>  // NOLINT
 
-#include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/string.hpp"
 #include "vadd.hpp"
 
 using namespace std::chrono_literals;  // NOLINT
@@ -122,14 +120,6 @@ char* read_binary_file(const std::string &xclbin_file_name, unsigned &nb) {  // 
 /////////////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char * argv[]) {
-  // ROS 2 abstractions
-  rclcpp::init(argc, argv);
-  auto node = rclcpp::Node::make_shared("accelerated_vadd_publisher");
-  auto publisher = node->create_publisher<std_msgs::msg::String>("vector_acceleration", 10);
-  auto publish_count = 0;
-  std_msgs::msg::String message;
-  rclcpp::WallRate loop_rate(100ms);
-
   // ------------------------------------------------------------------------
   // Step 1: Initialize the OpenCL environment for acceleration
   // ------------------------------------------------------------------------
@@ -172,7 +162,7 @@ int main(int argc, char * argv[]) {
   // Step 3: Main loop, set kernel arguments, schedule transfer
   //  of memory to kernel, run kernel and transfer memory back from it
   // ------------------------------------------------------------------------
-  while (rclcpp::ok()) {
+  while (true) {
     // randomize the vectors used
     for (int i = 0 ; i < DATA_SIZE ; i++) {
         in1[i] = rand() % DATA_SIZE;  // NOLINT
@@ -196,25 +186,10 @@ int main(int argc, char * argv[]) {
     q.finish();
 
     // Validate operation in the PS
-    check_vadd(in1, in2, out);
-
-    // Publish publish result
-    message.data = "vadd finished, iteration: " +
-      std::to_string(publish_count++);
-    RCLCPP_INFO(node->get_logger(), "Publishing: '%s'", message.data.c_str());
-
-    try {
-      publisher->publish(message);
-      rclcpp::spin_some(node);
-    } catch (const rclcpp::exceptions::RCLError & e) {
-      RCLCPP_ERROR(
-        node->get_logger(),
-        "unexpectedly failed with %s",
-        e.what());
-    }
-    loop_rate.sleep();
+    bool match = true;
+    match = check_vadd(in1, in2, out);
+    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
   }
-  rclcpp::shutdown();
   delete[] fileBuf;  // release memory from the acceleration kernel
 
   return 0;
