@@ -20,8 +20,8 @@ See https://github.com/Xilinx/Vitis-Tutorials/blob/master/Getting_Started/Vitis
 
 #include "vadd.hpp"
 
-#define DATA_SIZE 512
-// #define DATA_SIZE 4096  // 2**12
+// #define DATA_SIZE 512  // 2**8
+#define DATA_SIZE 4096  // 2**12
 // #define DATA_SIZE 16384  // 2**14
 // #define DATA_SIZE 65536  // 2**16
 // #define DATA_SIZE 262144  // 2**18

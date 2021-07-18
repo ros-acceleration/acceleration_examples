@@ -60,8 +60,8 @@ Input Vector 2 from Global Memory --->|             |      |__|
 #include <hls_stream.h>
 #include "assert.h"
 
-// #define DATA_SIZE 4096
-#define DATA_SIZE 512
+#define DATA_SIZE 4096
+// #define DATA_SIZE 512
 
 // TRIPCOUNT identifier
 const int c_size = DATA_SIZE;
@@ -87,6 +87,8 @@ execute2:
     for (int j = 0; j < vSize; ++j) {  // stupidly iterate over
                                         // it to generate load
     #pragma HLS LOOP_TRIPCOUNT min = c_size max = c_size
+    // #pragma HLS unroll region
+    // #pragma HLS loop_merge force
     execute:
         for (int i = 0; i < vSize; i++) {
         #pragma HLS LOOP_TRIPCOUNT min = c_size max = c_size

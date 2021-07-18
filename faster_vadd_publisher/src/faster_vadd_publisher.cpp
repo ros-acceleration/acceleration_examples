@@ -1,10 +1,17 @@
-// Copyright (c) 2021, Xilinx®.
-// All rights reserved
-//
-// Inspired by the Vector-Add example.
-// See https://github.com/Xilinx/Vitis-Tutorials/blob/master/Getting_Started/Vitis
-//
-// Author: Víctor Mayoral Vilches <v.mayoralv@gmail.com>
+/*
+      ____  ____
+     /   /\/   /
+    /___/  \  /   Copyright (c) 2021, Xilinx®.
+    \   \   \/    Author: Víctor Mayoral Vilches <victorma@xilinx.com>
+     \   \
+     /   /
+    /___/   /\
+    \   \  /  \
+     \___\/\___\
+     
+ Inspired by the Vector-Add example.
+ See https://github.com/Xilinx/Vitis-Tutorials/blob/master/Getting_Started/Vitis
+*/
 
 #define CL_HPP_CL_1_2_DEFAULT_BUILD
 #define CL_HPP_TARGET_OPENCL_VERSION 120
@@ -12,8 +19,8 @@
 #define CL_HPP_ENABLE_PROGRAM_CONSTRUCTION_FROM_ARRAY_COMPATIBILITY 1
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 
-#define DATA_SIZE 512  // 2**8
-// #define DATA_SIZE 4096  // 2**12
+// #define DATA_SIZE 512  // 2**8
+#define DATA_SIZE 4096  // 2**12
 // #define DATA_SIZE 16384  // 2**14
 // #define DATA_SIZE 65536  // 2**16
 // #define DATA_SIZE 262144  // 2**18

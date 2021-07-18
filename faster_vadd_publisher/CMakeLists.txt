@@ -60,19 +60,19 @@ vitis_hls_generate_tcl(
   SYNTHESIS  
 )
 
-# # vadd kernel
-# vitis_acceleration_kernel(
-#   NAME vadd
-#   FILE src/vadd.cpp
-#   CONFIG src/zcu102.cfg
-#   INCLUDE
-#     include
-#   TYPE
-#     sw_emu
-#     hw_emu
-#     hw
-#   PACKAGE
-# )
+# vadd kernel
+vitis_acceleration_kernel(
+  NAME vadd
+  FILE src/vadd.cpp
+  CONFIG src/zcu102.cfg
+  INCLUDE
+    include
+  TYPE
+    sw_emu
+    hw_emu
+    hw
+  PACKAGE
+)
 
 install(
   TARGETS
