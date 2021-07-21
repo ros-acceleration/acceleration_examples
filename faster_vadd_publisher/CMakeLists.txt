@@ -57,7 +57,8 @@ vitis_hls_generate_tcl(
     vadd
   CLOCK 
     4
-  SYNTHESIS  
+  SYNTHESIS
+  RTLSIM
 )
 
 # vadd kernel
@@ -68,8 +69,8 @@ vitis_acceleration_kernel(
   INCLUDE
     include
   TYPE
-    sw_emu
-    hw_emu
+    # sw_emu
+    # hw_emu
     hw
   PACKAGE
 )
