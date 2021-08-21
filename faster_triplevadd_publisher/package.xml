@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
-  <name>vadd_publisher</name>
+  <name>faster_triplevadd_publisher</name>
   <version>0.1.0</version>
-  <description>A a trivial vector-add ROS 2 publisher. Adds 
-  two inputs to a vector in a loop and publishes on the go at
-  10 Hz.
+  <description>A trivial triple vector-add ROS 2 publisher that adds two
+    inputs to a vector in a loop and publishes them on the go at 10 Hz.
+    Vector add operations are offloaded into to the FPGA and various HLS
+    pragmas are used to demonstrate hardware acceleration.
   </description>
   <maintainer email="victorma@xilinx.com">Víctor Mayoral Vilches</maintainer>
   <license>Apache License 2.0</license>
@@ -14,13 +15,13 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_vitis</buildtool_depend>
 
+  <depend>acceleration_firmware</depend>
+
   <build_depend>rclcpp</build_depend>
   <build_depend>std_msgs</build_depend>
-  <build_depend>acceleration_firmware_xilinx</build_depend>
 
   <exec_depend>rclcpp</exec_depend>
   <exec_depend>std_msgs</exec_depend>
-  <exec_depend>acceleration_firmware_xilinx</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

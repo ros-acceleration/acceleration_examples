@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
-  <name>accelerated_vadd_publisher</name>
+  <name>accelerated_doublevadd_publisher</name>
   <version>0.1.0</version>
   <description>A trivial vector-add ROS 2 publisher that adds two
     inputs to a vector in a loop and attempts to publish them on the go 
@@ -23,7 +23,7 @@
     from where its reading (simultaneously), we can optimize the dataflows by 
     simply asking for an extra AXI interface.
     
-    After using the PL, accelerated_vadd_publisher is able to publish at 6 Hz in 
+    After using the PL, accelerated_doublevadd_publisher is able to publish at 6 Hz in 
     the ZU+, still far from its targeted rate (10 Hz). See "vadd_publisher"
     for a version running purely on the APUs (2 Hz). See "faster_vadd_publisher" 
     for yet another version of this publisher which further leverages HLS pragmas 

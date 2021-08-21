@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(accelerated_vadd_publisher)
+project(triplevadd_publisher)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
@@ -13,29 +13,16 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(OpenCL REQUIRED)
-find_package(Threads REQUIRED)
 find_package(ament_vitis)
 
-# accelerated_vadd_publisher
-add_executable(accelerated_vadd_publisher
-  src/accelerated_vadd_publisher.cpp
-  src/vadd.cpp
-)
-target_include_directories(accelerated_vadd_publisher PUBLIC include)
-target_link_libraries(accelerated_vadd_publisher
-  ${OpenCL_LIBRARY}
-  pthread
-)
-ament_target_dependencies(accelerated_vadd_publisher
-  rclcpp
-  std_msgs
-)
+add_executable(triplevadd_publisher src/triplevadd_publisher.cpp src/vadd.cpp)
+target_include_directories(triplevadd_publisher PUBLIC include)
+ament_target_dependencies(triplevadd_publisher rclcpp std_msgs)
 
 # C simulation and synthesis
 vitis_hls_generate_tcl(
   PROJECT 
-    project_accelerated_vadd_publisher
+    project_triplevadd_publisher
   SRC 
     src/vadd.cpp
   HEADERS
@@ -49,23 +36,8 @@ vitis_hls_generate_tcl(
   SYNTHESIS
 )
 
-
-# # vadd kernel
-# vitis_acceleration_kernel(
-#   NAME vadd
-#   FILE src/vadd.cpp
-#   CONFIG src/zcu102.cfg
-#   INCLUDE
-#     include
-#   TYPE
-#     sw_emu
-#     # hw_emu
-#     # hw
-#   PACKAGE
-# )
-
 install(TARGETS
-  accelerated_vadd_publisher
+  triplevadd_publisher
   DESTINATION lib/${PROJECT_NAME}
 )
 

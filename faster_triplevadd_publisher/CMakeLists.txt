@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(faster_vadd_publisher)
+project(faster_triplevadd_publisher)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
@@ -19,7 +19,7 @@ find_package(ament_vitis)
 
 # faster_vadd
 add_executable(faster_vadd
-  src/faster_vadd.cpp
+  src/faster_triplevadd.cpp
   # src/vadd.cpp
 )
 target_include_directories(faster_vadd PUBLIC include)
@@ -28,17 +28,17 @@ target_link_libraries(faster_vadd
   pthread
 )
 
-# faster_vadd_publisher
-add_executable(faster_vadd_publisher
-  src/faster_vadd_publisher.cpp
+# faster_triplevadd_publisher
+add_executable(faster_triplevadd_publisher
+  src/faster_triplevadd_publisher.cpp
   # src/vadd.cpp
 )
-target_include_directories(faster_vadd_publisher PUBLIC include)
-target_link_libraries(faster_vadd_publisher
+target_include_directories(faster_triplevadd_publisher PUBLIC include)
+target_link_libraries(faster_triplevadd_publisher
   ${OpenCL_LIBRARY}
   pthread
 )
-ament_target_dependencies(faster_vadd_publisher
+ament_target_dependencies(faster_triplevadd_publisher
   rclcpp
   std_msgs
 )
@@ -46,7 +46,7 @@ ament_target_dependencies(faster_vadd_publisher
 # C simulation and synthesis
 vitis_hls_generate_tcl(
   PROJECT 
-    project_faster_vadd_publisher
+    project_faster_triplevadd_publisher
   SRC 
     src/vadd.cpp
   HEADERS
@@ -58,14 +58,15 @@ vitis_hls_generate_tcl(
   CLOCK 
     4
   SYNTHESIS
-  RTLSIM
+  # RTLSIMULATION
+  # RTLIMPLEMENTATION
 )
 
 # vadd kernel
 vitis_acceleration_kernel(
   NAME vadd
   FILE src/vadd.cpp
-  CONFIG src/zcu102.cfg
+  CONFIG src/kv260.cfg
   INCLUDE
     include
   TYPE
@@ -78,7 +79,7 @@ vitis_acceleration_kernel(
 install(
   TARGETS
     faster_vadd
-    faster_vadd_publisher
+    faster_triplevadd_publisher
   DESTINATION 
     lib/${PROJECT_NAME}
 )

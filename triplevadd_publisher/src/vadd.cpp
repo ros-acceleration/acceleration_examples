@@ -15,7 +15,6 @@ See https://github.com/Xilinx/Vitis-Tutorials/blob/master/Getting_Started/Vitis
 */
 
 #define DATA_SIZE 4096
-
 // TRIPCOUNT identifier
 const int c_size = DATA_SIZE;
 
@@ -27,9 +26,16 @@ extern "C" {
             int size                  // Size in integer
             )
     {
-        for (int i = 0; i < size; ++i) {
+        for (int z = 0; z < size; ++z) {
         #pragma HLS loop_tripcount min = c_size max = c_size
-            out[i] = in1[i] + in2[i];
+            for (int j = 0; j < size; ++j) {  // stupidly iterate over
+                                            // it to generate load
+            #pragma HLS loop_tripcount min = c_size max = c_size
+                for (int i = 0; i < size; ++i) {
+                #pragma HLS loop_tripcount min = c_size max = c_size
+                out[i] = in1[i] + in2[i];
+                }
+            }
         }
     }
 }

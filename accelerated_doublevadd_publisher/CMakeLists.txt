@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(accelerated_vadd_publisher_once)
+project(accelerated_doublevadd_publisher)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
@@ -17,34 +17,31 @@ find_package(OpenCL REQUIRED)
 find_package(Threads REQUIRED)
 find_package(ament_vitis)
 
-# accelerated_vadd_publisher
-add_executable(accelerated_vadd_publisher_once
-  src/accelerated_vadd_publisher_once.cpp
-  # src/vadd.cpp
+# accelerated_doublevadd_publisher
+add_executable(accelerated_doublevadd_publisher
+  src/accelerated_doublevadd_publisher.cpp
+  src/vadd.cpp
 )
-target_include_directories(accelerated_vadd_publisher_once PUBLIC 
-  include 
-  # $ENV{XILINX_HLS}/common/technology/autopilot
-)
-target_link_libraries(accelerated_vadd_publisher_once
+target_include_directories(accelerated_doublevadd_publisher PUBLIC include)
+target_link_libraries(accelerated_doublevadd_publisher
   ${OpenCL_LIBRARY}
   pthread
 )
-ament_target_dependencies(accelerated_vadd_publisher_once
+ament_target_dependencies(accelerated_doublevadd_publisher
   rclcpp
   std_msgs
 )
 
-# Generate Tcl script for analysis
+# C simulation and synthesis
 vitis_hls_generate_tcl(
   PROJECT 
-    project_accelerated_vadd_publisher_once
+    project_accelerated_doublevadd_publisher
   SRC 
     src/vadd.cpp
   HEADERS
     include
   TESTBENCH 
-    src/testbench_vadd.cpp
+    src/testbench.cpp
   TOPFUNCTION 
     vadd
   CLOCK 
@@ -52,11 +49,13 @@ vitis_hls_generate_tcl(
   SYNTHESIS
 )
 
+
 # vadd kernel
 vitis_acceleration_kernel(
   NAME vadd
   FILE src/vadd.cpp
   CONFIG src/kv260.cfg
+  # CONFIG src/zcu102.cfg
   INCLUDE
     include
   TYPE
@@ -67,7 +66,7 @@ vitis_acceleration_kernel(
 )
 
 install(TARGETS
-  accelerated_vadd_publisher_once
+  accelerated_doublevadd_publisher
   DESTINATION lib/${PROJECT_NAME}
 )
 

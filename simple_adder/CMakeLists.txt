@@ -81,19 +81,19 @@ vitis_hls_generate_tcl(
   SYNTHESIS
 )
 
-# # kernel
-# vitis_acceleration_kernel(
-#   NAME simple_adder
-#   FILE src/adder2.cpp
-#   CONFIG src/zcu102.cfg
-#   INCLUDE
-#     include
-#   TYPE
-#     sw_emu
-#     # hw_emu
-#     # hw
-#   PACKAGE
-# )
+# kernel
+vitis_acceleration_kernel(
+  NAME simple_adder
+  FILE src/adder2.cpp
+  CONFIG src/kv260.cfg
+  INCLUDE
+    include
+  TYPE
+    sw_emu
+    # hw_emu
+    # hw
+  PACKAGE
+)
 
 # cross-compilation
 add_executable(simple_adder2 src/testbench2.cpp src/adder2.cpp)
