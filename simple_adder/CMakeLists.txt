@@ -13,51 +13,55 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(ament_vitis)
 
-# ################
-# # simple_adder1
-# ################
+################
+# simple_adder1
+################
 
-# # C simulation and synthesis
-# vitis_hls_generate_tcl(
-#   PROJECT 
-#     project_simpleadder1
-#   SRC 
-#     src/adder1.cpp
-#   HEADERS
+# C simulation and synthesis
+vitis_hls_generate_tcl(
+  PROJECT 
+    project_simpleadder1
+  SRC 
+    src/adder1.cpp
+  HEADERS
+    include
+  TESTBENCH 
+    src/testbench1.cpp
+  TOPFUNCTION 
+    simple_adder
+  CLOCK 
+    4
+  SYNTHESIS
+)
+
+# #---------------------
+# # NOTE: uncomment if 
+# # hw kernel is desired
+# #----------------------
+#
+# # kernel
+# vitis_acceleration_kernel(
+#   NAME simple_adder
+#   FILE src/adder1.cpp
+#   CONFIG src/kv260.cfg
+#   INCLUDE
 #     include
-#   TESTBENCH 
-#     src/testbench1.cpp
-#   TOPFUNCTION 
-#     simple_adder
-#   CLOCK 
-#     4
-#   SYNTHESIS
+#   TYPE
+#     # sw_emu
+#     # hw_emu
+#     hw
+#   PACKAGE
 # )
 
-# # # kernel
-# # vitis_acceleration_kernel(
-# #   NAME simple_adder
-# #   FILE src/adder1.cpp
-# #   CONFIG src/zcu102.cfg
-# #   INCLUDE
-# #     include
-# #   TYPE
-# #     sw_emu
-# #     # hw_emu
-# #     # hw
-# #   PACKAGE
-# # )
+# cross-compilation
+add_executable(simple_adder1 src/testbench1.cpp src/adder1.cpp)
+target_include_directories(simple_adder1 PUBLIC include)
+# ament_target_dependencies(simple_adder1 rclcpp std_msgs)
 
-# # cross-compilation
-# add_executable(simple_adder1 src/testbench1.cpp src/adder1.cpp)
-# target_include_directories(simple_adder1 PUBLIC include)
-# # ament_target_dependencies(simple_adder1 rclcpp std_msgs)
-
-# install(TARGETS
-#   simple_adder1 
-#   # simple_adder2
-#   DESTINATION lib/${PROJECT_NAME}
-# )
+install(TARGETS
+  simple_adder1
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 
 ################
@@ -81,19 +85,24 @@ vitis_hls_generate_tcl(
   SYNTHESIS
 )
 
-# kernel
-vitis_acceleration_kernel(
-  NAME simple_adder
-  FILE src/adder2.cpp
-  CONFIG src/kv260.cfg
-  INCLUDE
-    include
-  TYPE
-    sw_emu
-    # hw_emu
-    # hw
-  PACKAGE
-)
+# #---------------------
+# # NOTE: uncomment if 
+# # hw kernel is desired
+# #----------------------
+#
+# # kernel
+# vitis_acceleration_kernel(
+#   NAME simple_adder
+#   FILE src/adder2.cpp
+#   CONFIG src/kv260.cfg
+#   INCLUDE
+#     include
+#   TYPE
+#     # sw_emu
+#     # hw_emu
+#     hw
+#   PACKAGE
+# )
 
 # cross-compilation
 add_executable(simple_adder2 src/testbench2.cpp src/adder2.cpp)
@@ -101,7 +110,6 @@ target_include_directories(simple_adder2 PUBLIC include)
 
 
 install(TARGETS
-  # simple_adder1 
   simple_adder2
   DESTINATION lib/${PROJECT_NAME}
 )
