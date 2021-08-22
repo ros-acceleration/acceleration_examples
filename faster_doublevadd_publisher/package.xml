@@ -8,7 +8,7 @@
     Vector add operations are offloaded into to the FPGA and various HLS
     pragmas are used to demonstrate hardware acceleration.
     
-    The offloading operation into the FPGA (or to the Programmable Logic (PL))
+    The acceleration operation into the FPGA (or to the Programmable Logic (PL))
     allows the publisher to meet its targeted rate (10 Hz). See "doublevadd_publisher"
     for a version running purely on the CPUs which publishes at 2 Hz. See 
     "accelerated_doublevadd_publisher" for another version which uses the HLS INTERFACE

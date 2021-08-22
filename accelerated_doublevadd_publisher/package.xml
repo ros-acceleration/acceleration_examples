@@ -11,7 +11,7 @@
     able to publish at 2 Hz on the quad-core Cortex-A53 Application 
     Processing Units (APUs) of the Zynq Ultrascale+ (ZU+) SoC.
 
-    The offloading operation into the FPGA (or to the Programmable Logic (PL))
+    The acceleration operation into the FPGA (or to the Programmable Logic (PL))
     allows the publisher to improve its publishing rate from 2 Hz, up to 6 Hz.
     For that, the HLS INTERFACE pragma is used. The HLS INTERFACE specifies 
     how RTL ports are created from the function definition during interface 
