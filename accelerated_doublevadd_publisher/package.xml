@@ -3,13 +3,13 @@
 <package format="2">
   <name>accelerated_doublevadd_publisher</name>
   <version>0.1.0</version>
-  <description>A trivial vector-add ROS 2 publisher that adds two
+  <description>A trivial double vector-add ROS 2 publisher that adds two
     inputs to a vector in a loop and attempts to publish them on the go 
     at 10 Hz. Vector add operations are offloaded into to the FPGA.
 
-    This example builds on top of "vadd_publisher" which is only able to
-    publish at 2 Hz on the quad-core Cortex-A53 Application Processing 
-    Units (APUs) of the Zynq Ultrascale+ (ZU+) SoC.
+    This example builds on top of "doublevadd_publisher" which is only 
+    able to publish at 2 Hz on the quad-core Cortex-A53 Application 
+    Processing Units (APUs) of the Zynq Ultrascale+ (ZU+) SoC.
 
     The offloading operation into the FPGA (or to the Programmable Logic (PL))
     allows the publisher to improve its publishing rate from 2 Hz, up to 6 Hz.
@@ -23,11 +23,11 @@
     from where its reading (simultaneously), we can optimize the dataflows by 
     simply asking for an extra AXI interface.
     
-    After using the PL, accelerated_doublevadd_publisher is able to publish at 6 Hz in 
-    the ZU+, still far from its targeted rate (10 Hz). See "vadd_publisher"
-    for a version running purely on the APUs (2 Hz). See "faster_vadd_publisher" 
-    for yet another version of this publisher which further leverages HLS pragmas 
-    to meet the targeted rate (10 Hz).
+    After using the PL, accelerated_doublevadd_publisher is able to publish at 6 Hz 
+    in the ZU+, still far from its targeted rate (10 Hz). See "doublevadd_publisher"
+    for a version running purely on the APUs (2 Hz). See "faster_doublevadd_publisher" 
+    for yet another version of this publisher which further leverages parallelism to
+    meet the targeted rate (10 Hz).
   </description>
   <maintainer email="victorma@xilinx.com">Víctor Mayoral Vilches</maintainer>
   <license>Apache License 2.0</license>
