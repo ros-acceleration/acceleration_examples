@@ -34,8 +34,9 @@ extern "C" {
         for (int z = 0; z < size; ++z) { // stupidly iterate over
                                          // it to generate load
         #pragma HLS loop_tripcount min = c_size max = c_size
-            for (int j = 0; j < (size/4096)*4096; ++j) {
-            #pragma HLS UNROLL factor = 4096
+            // for (int j = 0; j < size; ++j) {
+            for (int j = 0; j < (size/16)*16; ++j) {
+            #pragma HLS UNROLL factor = 16
             #pragma HLS loop_tripcount min = c_size max = c_size
                 for (int i = 0; i < (size/16)*16; ++i) {
                 #pragma HLS UNROLL factor = 16
