@@ -3,10 +3,10 @@
 <package format="2">
   <name>doublevadd_publisher</name>
   <version>0.1.0</version>
-  <description>A a trivial double vector-add ROS 2 publisher.
+  <description>A trivial double vector-add ROS 2 publisher.
     Adds two inputs to a vector in a loop and publishes on the go at
-    10 Hz. An emulation of the target hardware shows that it's not
-    able to meet the rate target and stays in between 2-4 Hz.
+    10 Hz. Running in hardware shows that it's not
+    able to meet the rate target and stays at around 2 Hz.
 
     The objective of this package is to generate a computationally expensive
     baseline when executed in a general purpose embedded CPU. See 
