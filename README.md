@@ -1,14 +1,12 @@
 # acceleration_examples
 
-`acceleration_examples` is a meta-package that contain various ROS packages examples demonstrating the use of hardware acceleration. Each one of these examples aims to support all hardware acceleration technology solutions complying with REP-2008 (see [pending PR](https://github.com/ros-infrastructure/rep/pull/324)). By doing so, `acceleration_examples` aims to a) illustrate ROS package maintainers and ROS users how to build their own acceleration kernels and b) guarantee interoperability across technologies complying with REP-2008.
-
-In turn, a CI system will be set to build the meta-package against all suported hardware.
-
-
-
 [![](https://img.shields.io/badge/hardware_acceleration-KV260-ec1c24.svg)](https://www.xilinx.com/products/som/kria/kv260-vision-starter-kit.html)
 [![](https://img.shields.io/badge/hardware_acceleration-ZCU102-ec1c24.svg)](https://www.xilinx.com/products/boards-and-kits/ek-u1-zcu102-g.html)
 
+
+`acceleration_examples` is a meta-package that contain various ROS packages examples demonstrating the use of hardware acceleration. Each one of these examples aims to support all hardware acceleration technology solutions complying with REP-2008 (see [pending PR](https://github.com/ros-infrastructure/rep/pull/324)). By doing so, `acceleration_examples` aims to a) illustrate ROS package maintainers and ROS users how to build their own acceleration kernels and b) guarantee interoperability across technologies complying with REP-2008.
+
+In turn, a CI system will be set to build the meta-package against all suported hardware.
 
 
 | Package | Kernel     | Description |   Acceleration factor | Technology | CPU baseline | Accelerated  |
