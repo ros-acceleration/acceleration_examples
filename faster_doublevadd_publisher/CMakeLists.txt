@@ -15,6 +15,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(OpenCL REQUIRED)
 find_package(Threads REQUIRED)
+find_package(vitis_common REQUIRED)
 find_package(ament_vitis)
 
 # faster_vadd
@@ -22,10 +23,15 @@ add_executable(faster_vadd
   src/faster_doublevadd.cpp
   # src/vadd.cpp
 )
-target_include_directories(faster_vadd PUBLIC include)
+target_include_directories(faster_vadd PUBLIC 
+  include
+)
 target_link_libraries(faster_vadd
   ${OpenCL_LIBRARY}
   pthread
+)
+ament_target_dependencies(faster_vadd
+  vitis_common  
 )
 
 # faster_doublevadd_publisher
@@ -41,6 +47,7 @@ target_link_libraries(faster_doublevadd_publisher
 ament_target_dependencies(faster_doublevadd_publisher
   rclcpp
   std_msgs
+  vitis_common  
 )
 
 # C simulation and synthesis
@@ -78,7 +85,7 @@ vitis_acceleration_kernel(
 
 install(
   TARGETS
-    faster_vadd
+    # faster_vadd
     faster_doublevadd_publisher
   DESTINATION 
     lib/${PROJECT_NAME}

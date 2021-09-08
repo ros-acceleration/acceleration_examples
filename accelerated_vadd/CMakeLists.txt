@@ -13,6 +13,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(OpenCL REQUIRED)
 find_package(Threads REQUIRED)
+find_package(vitis_common REQUIRED)
 find_package(ament_vitis)
 
 # accelerated_vadd

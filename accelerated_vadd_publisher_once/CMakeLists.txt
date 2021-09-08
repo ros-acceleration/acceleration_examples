@@ -15,6 +15,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(OpenCL REQUIRED)
 find_package(Threads REQUIRED)
+find_package(vitis_common REQUIRED)
 find_package(ament_vitis)
 
 # accelerated_vadd_publisher

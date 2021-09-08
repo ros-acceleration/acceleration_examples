@@ -15,6 +15,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(OpenCL REQUIRED)
 find_package(Threads REQUIRED)
+find_package(vitis_common REQUIRED)
 find_package(ament_vitis)
 
 # faster_vadd
@@ -27,6 +28,10 @@ target_link_libraries(faster_vadd
   ${OpenCL_LIBRARY}
   pthread
 )
+ament_target_dependencies(faster_vadd
+  vitis_common
+)
+
 
 # faster_triplevadd_publisher
 add_executable(faster_triplevadd_publisher
@@ -41,6 +46,7 @@ target_link_libraries(faster_triplevadd_publisher
 ament_target_dependencies(faster_triplevadd_publisher
   rclcpp
   std_msgs
+  vitis_common
 )
 
 # C simulation and synthesis

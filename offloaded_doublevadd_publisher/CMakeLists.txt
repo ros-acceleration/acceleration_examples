@@ -15,6 +15,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(OpenCL REQUIRED)
 find_package(Threads REQUIRED)
+find_package(vitis_common REQUIRED)
 find_package(ament_vitis)
 
 # offloaded_doublevadd_publisher
@@ -30,6 +31,7 @@ target_link_libraries(offloaded_doublevadd_publisher
 ament_target_dependencies(offloaded_doublevadd_publisher
   rclcpp
   std_msgs
+  vitis_common
 )
 
 # C simulation and synthesis
