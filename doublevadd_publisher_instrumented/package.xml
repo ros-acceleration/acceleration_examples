@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
+  <name>doublevadd_publisher_instrumented</name>
+  <version>0.1.0</version>
+  <description>A trivial double vector-add ROS 2 publisher instrumented
+    with LTTng.
+    
+    Adds two inputs to a vector in a loop and publishes on the go at
+    10 Hz. Running in hardware shows that it's not
+    able to meet the rate target and stays at around 2 Hz.
+
+    The objective of this package is to generate a computationally expensive
+    baseline when executed in a general purpose embedded CPU. See
+    "accelerated_doublevadd_publisher" package for an optimized and accelerated version of the
+    same package which offloads the vector operations into an FPGA. See
+    "faster_doublevadd_publisher" for an even more optimized version.
+  </description>
+  <maintainer email="victorma@xilinx.com">Víctor Mayoral Vilches</maintainer>
+  <license>Apache License 2.0</license>
+  <author email="victorma@xilinx.com">Víctor Mayoral Vilches</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_vitis</buildtool_depend>
+
+  <build_depend>rclcpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>acceleration_firmware_xilinx</build_depend>
+
+  <exec_depend>rclcpp</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>acceleration_firmware_xilinx</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
