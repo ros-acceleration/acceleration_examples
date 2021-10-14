@@ -74,9 +74,9 @@ int main(int argc, char * argv[]) {
     }
 
     // Add vectors
-    tracef("ros2:krs:doublevadd_publisher:main calling vadd");
+    tracef("ros2_acceleration:doublevadd_publisher -  calling vadd");
     vadd(in1, in2, out, DATA_SIZE);  // function subject to be accelerated
-    tracef("ros2:krs:doublevadd_publisher:main vadd finalized");
+    tracef("ros2_acceleration:doublevadd_publisher - vadd finalized");
 
     // Validate operation
     check_vadd(in1, in2, out);
