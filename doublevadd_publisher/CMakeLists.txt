@@ -14,24 +14,26 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(ament_vitis)
+find_package(tracetools REQUIRED)
+find_package(tracetools_acceleration REQUIRED)
 
 add_executable(doublevadd_publisher src/doublevadd_publisher.cpp src/vadd.cpp)
 target_include_directories(doublevadd_publisher PUBLIC include)
-ament_target_dependencies(doublevadd_publisher rclcpp std_msgs)
+ament_target_dependencies(doublevadd_publisher rclcpp std_msgs tracetools tracetools_acceleration)
 
 # C simulation and synthesis
 vitis_hls_generate_tcl(
-  PROJECT 
+  PROJECT
     project_doublevadd_publisher
-  SRC 
+  SRC
     src/vadd.cpp
   HEADERS
     include
-  TESTBENCH 
+  TESTBENCH
     src/testbench.cpp
-  TOPFUNCTION 
+  TOPFUNCTION
     vadd
-  CLOCK 
+  CLOCK
     4
   SYNTHESIS
 )
