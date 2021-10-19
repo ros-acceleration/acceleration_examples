@@ -8,8 +8,6 @@
 #     \   \  /  \
 #      \___\/\___\
 #
-# Inspired by
-# https://gitlab.com/ros-tracing/tracetools_analysis/-/blob/master/tracetools_analysis/launch/profile.launch.py
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +34,7 @@ def generate_launch_description():
     return LaunchDescription(
         [
             Trace(
-                session_name="profile",
+                session_name="vadd_capture",
                 events_ust=[
                     "ros2_acceleration:vadd_pre",
                     "ros2_acceleration:vadd_post",

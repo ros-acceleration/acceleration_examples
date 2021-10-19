@@ -77,9 +77,9 @@ int main(int argc, char * argv[]) {
 
     // Add vectors
     // tracef("ros2:krs:doublevadd_publisher:main calling vadd");
-    TRACEPOINT(vadd_pre);
+    TRACEPOINT(vadd_pre, ("iteration: " + std::to_string(publish_count)).c_str());
     vadd(in1, in2, out, DATA_SIZE);  // function subject to be accelerated
-    TRACEPOINT(vadd_post);
+    TRACEPOINT(vadd_post, ("iteration: " + std::to_string(publish_count)).c_str());
 
     // Validate operation
     check_vadd(in1, in2, out);
