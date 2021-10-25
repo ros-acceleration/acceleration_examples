@@ -3,7 +3,7 @@
 <package format="2">
   <name>vadd_publisher</name>
   <version>0.2.0</version>
-  <description>A a trivial vector-add ROS 2 publisher. Adds 
+  <description>A a trivial vector-add ROS 2 publisher. Adds
   two inputs to a vector in a loop and publishes on the go at
   10 Hz.
   </description>

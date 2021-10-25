@@ -19,22 +19,24 @@ add_executable(vadd_publisher src/vadd_publisher.cpp src/vadd.cpp)
 target_include_directories(vadd_publisher PUBLIC include)
 ament_target_dependencies(vadd_publisher rclcpp std_msgs)
 
-# C simulation and synthesis
-vitis_hls_generate_tcl(
-  PROJECT 
-    project_vadd_publisher
-  SRC 
-    src/vadd.cpp
-  HEADERS
-    include
-  TESTBENCH 
-    src/testbench.cpp
-  TOPFUNCTION 
-    vadd
-  CLOCK 
-    4
-  SYNTHESIS
-)
+if(ROS_ACCELERATION)
+  # C simulation and synthesis
+  vitis_hls_generate_tcl(
+    PROJECT
+      project_vadd_publisher
+    SRC
+      src/vadd.cpp
+    HEADERS
+      include
+    TESTBENCH
+      src/testbench.cpp
+    TOPFUNCTION
+      vadd
+    CLOCK
+      4
+    SYNTHESIS
+  )
+endif()
 
 install(TARGETS
   vadd_publisher

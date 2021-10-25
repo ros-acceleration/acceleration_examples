@@ -21,22 +21,24 @@ add_executable(doublevadd_publisher src/doublevadd_publisher.cpp src/vadd.cpp)
 target_include_directories(doublevadd_publisher PUBLIC include)
 ament_target_dependencies(doublevadd_publisher rclcpp std_msgs tracetools tracetools_acceleration)
 
-# C simulation and synthesis
-vitis_hls_generate_tcl(
-  PROJECT
-    project_doublevadd_publisher
-  SRC
-    src/vadd.cpp
-  HEADERS
-    include
-  TESTBENCH
-    src/testbench.cpp
-  TOPFUNCTION
-    vadd
-  CLOCK
-    4
-  SYNTHESIS
-)
+if(ROS_ACCELERATION)
+  # C simulation and synthesis
+  vitis_hls_generate_tcl(
+    PROJECT
+      project_doublevadd_publisher
+    SRC
+      src/vadd.cpp
+    HEADERS
+      include
+    TESTBENCH
+      src/testbench.cpp
+    TOPFUNCTION
+      vadd
+    CLOCK
+      4
+    SYNTHESIS
+  )
+endif()
 
 install(TARGETS
   doublevadd_publisher

@@ -49,44 +49,46 @@ ament_target_dependencies(faster_triplevadd_publisher
   vitis_common
 )
 
-# C simulation and synthesis
-vitis_hls_generate_tcl(
-  PROJECT 
-    project_faster_triplevadd_publisher
-  SRC 
-    src/vadd.cpp
-  HEADERS
-    include
-  TESTBENCH 
-    src/testbench.cpp
-  TOPFUNCTION 
-    vadd
-  CLOCK 
-    4
-  SYNTHESIS
-  # RTLSIMULATION
-  # RTLIMPLEMENTATION
-)
+if(ROS_ACCELERATION)
+  # C simulation and synthesis
+  vitis_hls_generate_tcl(
+    PROJECT
+      project_faster_triplevadd_publisher
+    SRC
+      src/vadd.cpp
+    HEADERS
+      include
+    TESTBENCH
+      src/testbench.cpp
+    TOPFUNCTION
+      vadd
+    CLOCK
+      4
+    SYNTHESIS
+    # RTLSIMULATION
+    # RTLIMPLEMENTATION
+  )
 
-# vadd kernel
-vitis_acceleration_kernel(
-  NAME vadd
-  FILE src/vadd.cpp
-  CONFIG src/kv260.cfg
-  INCLUDE
-    include
-  TYPE
-    # sw_emu
-    # hw_emu
-    hw
-  PACKAGE
-)
+  # vadd kernel
+  vitis_acceleration_kernel(
+    NAME vadd
+    FILE src/vadd.cpp
+    CONFIG src/kv260.cfg
+    INCLUDE
+      include
+    TYPE
+      # sw_emu
+      # hw_emu
+      hw
+    PACKAGE
+  )
+endif()
 
 install(
   TARGETS
     faster_vadd
     faster_triplevadd_publisher
-  DESTINATION 
+  DESTINATION
     lib/${PROJECT_NAME}
 )
 
