@@ -16,6 +16,8 @@ find_package(std_msgs REQUIRED)
 find_package(OpenCL REQUIRED)
 find_package(Threads REQUIRED)
 find_package(vitis_common REQUIRED)
+find_package(tracetools REQUIRED)
+find_package(tracetools_acceleration REQUIRED)
 find_package(ament_vitis)
 
 # faster_vadd
@@ -48,6 +50,8 @@ ament_target_dependencies(faster_doublevadd_publisher
   rclcpp
   std_msgs
   vitis_common
+  tracetools
+  tracetools_acceleration
 )
 
 if(ROS_ACCELERATION)
@@ -97,5 +101,11 @@ if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+# Install launch files.
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
 
 ament_package()
