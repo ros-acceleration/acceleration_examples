@@ -31,7 +31,7 @@ import os
 # Create a trace collection message iterator from the first command-line
 # argument.
 msg_it = bt2.TraceCollectionMessageIterator(
-    str(os.environ["HOME"]) + "/.ros/tracing/vadd_capture"
+    str(os.environ["HOME"]) + "/.ros/tracing/faster_doublevadd_publisher"
 )
 
 # Last event's time (ns from origin).
