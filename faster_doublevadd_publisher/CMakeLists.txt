@@ -55,6 +55,7 @@ ament_target_dependencies(faster_doublevadd_publisher
 )
 
 if(ROS_ACCELERATION)
+
   # C simulation and synthesis
   vitis_hls_generate_tcl(
     PROJECT
@@ -74,6 +75,25 @@ if(ROS_ACCELERATION)
     # RTLIMPLEMENTATION
   )
 
+  # # C simulation and synthesis
+  # vitis_hls_generate_tcl(
+  #   PROJECT
+  #     project_faster_doublevadd_publisher_slx
+  #   SRC
+  #     src/vadd_slx.cpp
+  #   HEADERS
+  #     include
+  #   TESTBENCH
+  #     src/testbench.cpp
+  #   TOPFUNCTION
+  #     vadd
+  #   CLOCK
+  #     4
+  #   SYNTHESIS
+  #   # RTLSIMULATION
+  #   # RTLIMPLEMENTATION
+  # )
+
   # vadd kernel
   vitis_acceleration_kernel(
     NAME vadd
@@ -87,6 +107,20 @@ if(ROS_ACCELERATION)
       hw
     PACKAGE
   )
+
+  # # vadd kernel
+  # vitis_acceleration_kernel(
+  #   NAME vadd
+  #   FILE src/vadd_slx.cpp
+  #   CONFIG src/kv260.cfg
+  #   INCLUDE
+  #     include
+  #   TYPE
+  #     # sw_emu
+  #     # hw_emu
+  #     hw
+  #   PACKAGE
+  # )
 endif()
 
 install(
