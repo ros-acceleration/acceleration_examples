@@ -30,7 +30,7 @@ ament_target_dependencies(doublevadd_publisher rclcpp std_msgs tracetools tracet
 
 # Component
 add_library(doublevadd_component SHARED
-src/doublevadd_component.cpp)
+src/doublevadd_component.cpp src/vadd.cpp)
 target_compile_definitions(doublevadd_component
   PRIVATE "COMPOSITION_BUILDING_DLL")
 ament_target_dependencies(doublevadd_component
