@@ -23,8 +23,8 @@ add_executable(accelerated_vadd_publisher_once
   src/accelerated_vadd_publisher_once.cpp
   # src/vadd.cpp
 )
-target_include_directories(accelerated_vadd_publisher_once PUBLIC 
-  include 
+target_include_directories(accelerated_vadd_publisher_once PUBLIC
+  include
   # $ENV{XILINX_HLS}/common/technology/autopilot
 )
 target_link_libraries(accelerated_vadd_publisher_once
@@ -36,36 +36,38 @@ ament_target_dependencies(accelerated_vadd_publisher_once
   std_msgs
 )
 
-# Generate Tcl script for analysis
-vitis_hls_generate_tcl(
-  PROJECT 
-    project_accelerated_vadd_publisher_once
-  SRC 
-    src/vadd.cpp
-  HEADERS
-    include
-  TESTBENCH 
-    src/testbench_vadd.cpp
-  TOPFUNCTION 
-    vadd
-  CLOCK 
-    4
-  SYNTHESIS
-)
+if(ROS_ACCELERATION)
+  # Generate Tcl script for analysis
+  vitis_hls_generate_tcl(
+    PROJECT
+      project_accelerated_vadd_publisher_once
+    SRC
+      src/vadd.cpp
+    HEADERS
+      include
+    TESTBENCH
+      src/testbench_vadd.cpp
+    TOPFUNCTION
+      vadd
+    CLOCK
+      4
+    SYNTHESIS
+  )
 
-# vadd kernel
-vitis_acceleration_kernel(
-  NAME vadd
-  FILE src/vadd.cpp
-  CONFIG src/kv260.cfg
-  INCLUDE
-    include
-  TYPE
-    # sw_emu
-    # hw_emu
-    hw
-  PACKAGE
-)
+  # vadd kernel
+  vitis_acceleration_kernel(
+    NAME vadd
+    FILE src/vadd.cpp
+    CONFIG src/kv260.cfg
+    INCLUDE
+      include
+    TYPE
+      # sw_emu
+      # hw_emu
+      hw
+    PACKAGE
+  )
+endif()
 
 install(TARGETS
   accelerated_vadd_publisher_once

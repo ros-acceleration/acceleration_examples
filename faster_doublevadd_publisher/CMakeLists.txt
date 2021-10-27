@@ -16,6 +16,8 @@ find_package(std_msgs REQUIRED)
 find_package(OpenCL REQUIRED)
 find_package(Threads REQUIRED)
 find_package(vitis_common REQUIRED)
+find_package(tracetools REQUIRED)
+find_package(tracetools_acceleration REQUIRED)
 find_package(ament_vitis)
 
 # faster_vadd
@@ -23,7 +25,7 @@ add_executable(faster_vadd
   src/faster_doublevadd.cpp
   # src/vadd.cpp
 )
-target_include_directories(faster_vadd PUBLIC 
+target_include_directories(faster_vadd PUBLIC
   include
 )
 target_link_libraries(faster_vadd
@@ -31,7 +33,7 @@ target_link_libraries(faster_vadd
   pthread
 )
 ament_target_dependencies(faster_vadd
-  vitis_common  
+  vitis_common
 )
 
 # faster_doublevadd_publisher
@@ -47,47 +49,85 @@ target_link_libraries(faster_doublevadd_publisher
 ament_target_dependencies(faster_doublevadd_publisher
   rclcpp
   std_msgs
-  vitis_common  
+  vitis_common
+  tracetools
+  tracetools_acceleration
 )
 
-# C simulation and synthesis
-vitis_hls_generate_tcl(
-  PROJECT 
-    project_faster_doublevadd_publisher
-  SRC 
-    src/vadd.cpp
-  HEADERS
-    include
-  TESTBENCH 
-    src/testbench.cpp
-  TOPFUNCTION 
-    vadd
-  CLOCK 
-    4
-  SYNTHESIS
-  # RTLSIMULATION
-  # RTLIMPLEMENTATION
-)
+if(ROS_ACCELERATION)
 
-# vadd kernel
-vitis_acceleration_kernel(
-  NAME vadd
-  FILE src/vadd.cpp
-  CONFIG src/kv260.cfg
-  INCLUDE
-    include
-  TYPE
-    # sw_emu
-    # hw_emu
-    hw
-  PACKAGE
-)
+  # C simulation and synthesis
+  vitis_hls_generate_tcl(
+    PROJECT
+      project_faster_doublevadd_publisher
+    SRC
+      src/vadd.cpp
+    HEADERS
+      include
+    TESTBENCH
+      src/testbench.cpp
+    TOPFUNCTION
+      vadd
+    CLOCK
+      4
+    SYNTHESIS
+    # RTLSIMULATION
+    # RTLIMPLEMENTATION
+  )
+
+  # # C simulation and synthesis
+  # vitis_hls_generate_tcl(
+  #   PROJECT
+  #     project_faster_doublevadd_publisher_slx
+  #   SRC
+  #     src/vadd_slx.cpp
+  #   HEADERS
+  #     include
+  #   TESTBENCH
+  #     src/testbench.cpp
+  #   TOPFUNCTION
+  #     vadd
+  #   CLOCK
+  #     4
+  #   SYNTHESIS
+  #   # RTLSIMULATION
+  #   # RTLIMPLEMENTATION
+  # )
+
+  # vadd kernel
+  vitis_acceleration_kernel(
+    NAME vadd
+    FILE src/vadd.cpp
+    CONFIG src/kv260.cfg
+    INCLUDE
+      include
+    TYPE
+      # sw_emu
+      # hw_emu
+      hw
+    PACKAGE
+  )
+
+  # # vadd kernel
+  # vitis_acceleration_kernel(
+  #   NAME vadd
+  #   FILE src/vadd_slx.cpp
+  #   CONFIG src/kv260.cfg
+  #   INCLUDE
+  #     include
+  #   TYPE
+  #     # sw_emu
+  #     # hw_emu
+  #     hw
+  #   PACKAGE
+  # )
+endif()
 
 install(
   TARGETS
     # faster_vadd
     faster_doublevadd_publisher
-  DESTINATION 
+  DESTINATION
     lib/${PROJECT_NAME}
 )
 
@@ -95,5 +135,11 @@ if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+# Install launch files.
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
 
 ament_package()

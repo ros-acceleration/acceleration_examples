@@ -25,19 +25,21 @@ target_link_libraries(accelerated_vadd
   pthread
 )
 
-# vadd kernel
-vitis_acceleration_kernel(
-  NAME vadd
-  FILE src/vadd.cpp
-  CONFIG src/kv260.cfg
-  INCLUDE
-    include
-  TYPE
-    sw_emu
-    # hw_emu
-    # hw
-  PACKAGE
-)
+if(ROS_ACCELERATION)
+  # vadd kernel
+  vitis_acceleration_kernel(
+    NAME vadd
+    FILE src/vadd.cpp
+    CONFIG src/kv260.cfg
+    INCLUDE
+      include
+    TYPE
+      sw_emu
+      # hw_emu
+      # hw
+    PACKAGE
+  )
+endif()
 
 install(TARGETS
   accelerated_vadd

@@ -2,17 +2,17 @@
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
   <name>faster_doublevadd_publisher</name>
-  <version>0.2.0</version>
+  <version>0.3.0</version>
   <description>A trivial double vector-add ROS 2 publisher that adds two
     inputs to a vector in a loop and publishes them on the go at 10 Hz.
     Vector add operations are offloaded into to the FPGA and various HLS
     pragmas are used to demonstrate hardware acceleration.
-    
+
     The acceleration operation into the FPGA (or to the Programmable Logic (PL))
     allows the publisher to meet its targeted rate (10 Hz). See "doublevadd_publisher"
-    for a version running purely on the CPUs which publishes at 2 Hz. See 
+    for a version running purely on the CPUs which publishes at 2 Hz. See
     "accelerated_doublevadd_publisher" for another version which uses the HLS INTERFACE
-    pragma to create two m_axi ports (instead of a single one, which is the 
+    pragma to create two m_axi ports (instead of a single one, which is the
     default behavior with HLS) in the vadd kernel allowing to simultaneously
     perform reads and writes on the two vectors passed as arguments to the kernel.
   </description>
@@ -24,6 +24,8 @@
   <buildtool_depend>ament_vitis</buildtool_depend>
 
   <depend>acceleration_firmware</depend>
+  <depend>tracetools</depend>
+  <depend>tracetools_acceleration</depend>
 
   <build_depend>rclcpp</build_depend>
   <build_depend>std_msgs</build_depend>

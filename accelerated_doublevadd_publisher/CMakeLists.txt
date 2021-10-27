@@ -34,38 +34,40 @@ ament_target_dependencies(accelerated_doublevadd_publisher
   vitis_common
 )
 
-# C simulation and synthesis
-vitis_hls_generate_tcl(
-  PROJECT 
-    project_accelerated_doublevadd_publisher
-  SRC 
-    src/vadd.cpp
-  HEADERS
-    include
-  TESTBENCH 
-    src/testbench.cpp
-  TOPFUNCTION 
-    vadd
-  CLOCK 
-    4
-  SYNTHESIS
-)
+if(ROS_ACCELERATION)
+  # C simulation and synthesis
+  vitis_hls_generate_tcl(
+    PROJECT
+      project_accelerated_doublevadd_publisher
+    SRC
+      src/vadd.cpp
+    HEADERS
+      include
+    TESTBENCH
+      src/testbench.cpp
+    TOPFUNCTION
+      vadd
+    CLOCK
+      4
+    SYNTHESIS
+  )
 
 
-# vadd kernel
-vitis_acceleration_kernel(
-  NAME vadd
-  FILE src/vadd.cpp
-  CONFIG src/kv260.cfg
-  # CONFIG src/zcu102.cfg
-  INCLUDE
-    include
-  TYPE
-    # sw_emu
-    # hw_emu
-    hw
-  PACKAGE
-)
+  # vadd kernel
+  vitis_acceleration_kernel(
+    NAME vadd
+    FILE src/vadd.cpp
+    CONFIG src/kv260.cfg
+    # CONFIG src/zcu102.cfg
+    INCLUDE
+      include
+    TYPE
+      # sw_emu
+      # hw_emu
+      hw
+    PACKAGE
+  )
+endif()
 
 install(TARGETS
   accelerated_doublevadd_publisher

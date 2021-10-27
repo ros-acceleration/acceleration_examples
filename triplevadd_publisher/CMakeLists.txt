@@ -19,22 +19,24 @@ add_executable(triplevadd_publisher src/triplevadd_publisher.cpp src/vadd.cpp)
 target_include_directories(triplevadd_publisher PUBLIC include)
 ament_target_dependencies(triplevadd_publisher rclcpp std_msgs)
 
-# C simulation and synthesis
-vitis_hls_generate_tcl(
-  PROJECT 
-    project_triplevadd_publisher
-  SRC 
-    src/vadd.cpp
-  HEADERS
-    include
-  TESTBENCH 
-    src/testbench.cpp
-  TOPFUNCTION 
-    vadd
-  CLOCK 
-    4
-  SYNTHESIS
-)
+if(ROS_ACCELERATION)
+  # C simulation and synthesis
+  vitis_hls_generate_tcl(
+    PROJECT
+      project_triplevadd_publisher
+    SRC
+      src/vadd.cpp
+    HEADERS
+      include
+    TESTBENCH
+      src/testbench.cpp
+    TOPFUNCTION
+      vadd
+    CLOCK
+      4
+    SYNTHESIS
+  )
+endif()
 
 install(TARGETS
   triplevadd_publisher

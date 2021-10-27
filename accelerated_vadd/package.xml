@@ -17,10 +17,10 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_vitis</buildtool_depend>  
 
-  <build_depend>acceleration_firmware_xilinx</build_depend>
+  <build_depend>acceleration_firmware_kv260</build_depend>
   <build_depend>vitis_common</build_depend>
   
-  <exec_depend>acceleration_firmware_xilinx</exec_depend>
+  <exec_depend>acceleration_firmware_kv260</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

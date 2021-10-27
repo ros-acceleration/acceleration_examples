@@ -8,7 +8,7 @@
     /___/   /\
     \   \  /  \
      \___\/\___\
-     
+
  Inspired by the Vector-Add example.
  See https://github.com/Xilinx/Vitis-Tutorials/blob/master/Getting_Started/Vitis
 */
@@ -24,6 +24,9 @@
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "tracetools/tracetools.h"
+#include "tracetools_acceleration/tracetools.h"
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
@@ -123,6 +126,7 @@ int main(int argc, char * argv[]) {
         out[i] = 0;
     }
 
+    TRACEPOINT(vadd_pre, ("iteration: " + std::to_string(publish_count)).c_str());
     // Set kernel arguments
     krnl_vector_add.setArg(0, in1_buf);
     krnl_vector_add.setArg(1, in2_buf);
@@ -137,6 +141,7 @@ int main(int argc, char * argv[]) {
     q.enqueueMigrateMemObjects({out_buf}, CL_MIGRATE_MEM_OBJECT_HOST);
     // Wait for all scheduled operations to finish
     q.finish();
+    TRACEPOINT(vadd_post, ("iteration: " + std::to_string(publish_count)).c_str());
 
     // Validate operation in the PS
     check_vadd(in1, in2, out);

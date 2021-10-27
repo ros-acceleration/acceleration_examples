@@ -18,6 +18,10 @@ See https://github.com/Xilinx/Vitis-Tutorials/blob/master/Getting_Started/Vitis
 #include <memory>
 #include <string>
 
+// #include <lttng/tracef.h>  // uncoment if using tracef
+#include "tracetools/tracetools.h"
+#include "tracetools_acceleration/tracetools.h"
+
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "vadd.hpp"
@@ -72,7 +76,10 @@ int main(int argc, char * argv[]) {
     }
 
     // Add vectors
+    // tracef("ros2:krs:doublevadd_publisher:main calling vadd");
+    TRACEPOINT(vadd_pre, ("iteration: " + std::to_string(publish_count)).c_str());
     vadd(in1, in2, out, DATA_SIZE);  // function subject to be accelerated
+    TRACEPOINT(vadd_post, ("iteration: " + std::to_string(publish_count)).c_str());
 
     // Validate operation
     check_vadd(in1, in2, out);
