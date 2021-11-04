@@ -28,19 +28,35 @@ add_executable(doublevadd_publisher src/doublevadd_publisher.cpp src/vadd.cpp)
 target_include_directories(doublevadd_publisher PUBLIC include)
 ament_target_dependencies(doublevadd_publisher rclcpp std_msgs tracetools tracetools_acceleration)
 
-# Component
+set(COMPONENT_AMENT_DEPENDENCIES
+  rclcpp
+  rclcpp_components
+  std_msgs
+  tracetools
+  tracetools_acceleration)
+
+# Components
+## Simple component
 add_library(doublevadd_component SHARED
 src/doublevadd_component.cpp src/vadd.cpp)
 target_compile_definitions(doublevadd_component
   PRIVATE "COMPOSITION_BUILDING_DLL")
-ament_target_dependencies(doublevadd_component
-  "rclcpp"
-  "rclcpp_components"
-  "std_msgs"
-  "tracetools"
-  "tracetools_acceleration")
+ament_target_dependencies(doublevadd_component ${COMPONENT_AMENT_DEPENDENCIES})
 rclcpp_components_register_nodes(doublevadd_component "composition::DoubleVaddNode")
 set(node_plugins "${node_plugins}composition::DoubleVaddNode;$<TARGET_FILE:doublevadd_component>\n")
+
+## Component using type adaptation
+##  only available in ROS_DISTRO="rolling" for now
+if($ENV{ROS_DISTRO} STREQUAL "rolling")
+  add_library(doublevadd_component_typeadapter SHARED
+  src/doublevadd_component_typeadapter.cpp src/vadd.cpp)
+  target_compile_definitions(doublevadd_component_typeadapter
+    PRIVATE "COMPOSITION_BUILDING_DLL")
+  ament_target_dependencies(doublevadd_component_typeadapter ${COMPONENT_AMENT_DEPENDENCIES})
+  rclcpp_components_register_nodes(doublevadd_component_typeadapter "composition::DoubleVaddTypeAdapter")
+  set(node_plugins "${node_plugins}composition::DoubleVaddTypeAdapter;$<TARGET_FILE:doublevadd_component_typeadapter>\n")
+endif()
+
 
 # Node built with "component"
 add_executable(doublevadd_node src/doublevadd_node.cpp src/vadd.cpp)
