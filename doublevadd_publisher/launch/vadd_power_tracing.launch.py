@@ -26,6 +26,7 @@ import launch
 from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
 from tracetools_launch.action import Trace
+from launch_ros.actions import Node
 from tracetools_trace.tools.names import DEFAULT_CONTEXT
 from tracetools_trace.tools.names import DEFAULT_EVENTS_ROS
 
@@ -44,6 +45,8 @@ def generate_launch_description():
         # ],
     )
 
+    # Launching things within the same process leads to traces either from one
+    # Node, or the other, but not simultaneously.
     container = ComposableNodeContainer(
         name="my_container",
         namespace="",
@@ -53,13 +56,20 @@ def generate_launch_description():
             ComposableNode(
                 package="ros2_kria_power", plugin="composition::Power", name="power"
             ),
-            ComposableNode(
-                package="doublevadd_publisher",
-                plugin="composition::DoubleVaddNode",
-                name="doublevadd_publisher",
-            ),
+            # ComposableNode(
+            #     package="doublevadd_publisher",
+            #     plugin="composition::DoubleVaddNode",
+            #     name="doublevadd_publisher",
+            # ),
         ],
         output="screen",
     )
 
-    return launch.LaunchDescription([container, trace])
+    node = Node(
+        package="doublevadd_publisher",
+        executable="doublevadd_publisher",
+        # arguments=["do_more"],
+        output="screen",
+    )
+
+    return launch.LaunchDescription([trace, container, node])
