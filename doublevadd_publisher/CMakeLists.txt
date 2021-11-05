@@ -36,7 +36,7 @@ set(COMPONENT_AMENT_DEPENDENCIES
   tracetools_acceleration)
 
 # Components
-## Simple component
+## Simple composition
 add_library(doublevadd_component SHARED
 src/doublevadd_component.cpp src/vadd.cpp)
 target_compile_definitions(doublevadd_component
@@ -45,7 +45,7 @@ ament_target_dependencies(doublevadd_component ${COMPONENT_AMENT_DEPENDENCIES})
 rclcpp_components_register_nodes(doublevadd_component "composition::DoubleVaddNode")
 set(node_plugins "${node_plugins}composition::DoubleVaddNode;$<TARGET_FILE:doublevadd_component>\n")
 
-## Component using type adaptation
+## Using type adaptation
 ##  only available in ROS_DISTRO="rolling" for now
 if($ENV{ROS_DISTRO} STREQUAL "rolling")
   add_library(doublevadd_component_typeadapter SHARED
@@ -57,8 +57,16 @@ if($ENV{ROS_DISTRO} STREQUAL "rolling")
   set(node_plugins "${node_plugins}composition::DoubleVaddTypeAdapter;$<TARGET_FILE:doublevadd_component_typeadapter>\n")
 endif()
 
+# ## Adaptive Component
+# add_library(doublevadd_component_adaptive SHARED
+# src/doublevadd_component_adaptive.cpp src/vadd.cpp)
+# target_compile_definitions(doublevadd_component_adaptive
+#   PRIVATE "COMPOSITION_BUILDING_DLL")
+# ament_target_dependencies(doublevadd_component_adaptive ${COMPONENT_AMENT_DEPENDENCIES})
+# rclcpp_components_register_nodes(doublevadd_component_adaptive "composition::DoubleVaddAdaptiveComponent")
+# set(node_plugins "${node_plugins}composition::DoubleVaddAdaptiveComponent;$<TARGET_FILE:doublevadd_component_adaptive>\n")
 
-# Node built with "component"
+# Node built with a "component"
 add_executable(doublevadd_node src/doublevadd_node.cpp src/vadd.cpp)
 target_link_libraries(doublevadd_node doublevadd_component)
 ament_target_dependencies(doublevadd_node rclcpp class_loader)
@@ -67,6 +75,24 @@ ament_target_dependencies(doublevadd_node rclcpp class_loader)
 #
 # rosidl_target_interfaces(doublevadd_node
 #       ${PROJECT_NAME} "rosidl_typesupport_cpp")
+
+# Adaptive Node built with a "component" defined altogether
+if(ROS_ACCELERATION)
+  find_package(OpenCL REQUIRED)
+  find_package(vitis_common REQUIRED)
+
+  add_executable(doublevadd_node_adaptive src/doublevadd_node_adaptive.cpp src/vadd.cpp)
+  target_include_directories(doublevadd_node_adaptive PUBLIC include)
+  target_link_libraries(doublevadd_node_adaptive ${OpenCL_LIBRARY})
+  ament_target_dependencies(doublevadd_node_adaptive
+    rclcpp
+    std_msgs
+    tracetools
+    tracetools_acceleration
+    class_loader
+    vitis_common)
+endif()
+
 
 if(ROS_ACCELERATION)
   # C simulation and synthesis
@@ -94,11 +120,20 @@ install(TARGETS
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 
-install(TARGETS
-  doublevadd_publisher
-  doublevadd_node
-  DESTINATION lib/${PROJECT_NAME}
-)
+if(ROS_ACCELERATION)
+  install(TARGETS
+    doublevadd_publisher
+    doublevadd_node
+    doublevadd_node_adaptive
+    DESTINATION lib/${PROJECT_NAME}
+  )
+else()
+  install(TARGETS
+    doublevadd_publisher
+    doublevadd_node
+    DESTINATION lib/${PROJECT_NAME}
+  )
+endif()
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
