@@ -58,11 +58,8 @@ bool check_vadd(
 namespace composition
 {
 
-// Create a DoubleVaddNode "component" that subclasses the generic rclcpp::Node base class.
-// Components get built into shared libraries and as such do not write their own main functions.
-// The process using the component's shared library will instantiate the class as a ROS node.
-DoubleVaddNode::DoubleVaddNode(const rclcpp::NodeOptions & options)
-: Node("doublevadd_publisher", options), count_(0)
+void
+DoubleVaddComponent::initialize()
 {
   // Create a publisher of "std_mgs/String" messages on the "chatter" topic.
   pub_ = create_publisher<std_msgs::msg::String>("vector", 10);
@@ -71,11 +68,11 @@ DoubleVaddNode::DoubleVaddNode(const rclcpp::NodeOptions & options)
   dt_ = 100ms;  // 10 Hz
 
   // Use a timer to schedule periodic message publishing.
-  timer_ = create_wall_timer(dt_, std::bind(&DoubleVaddNode::on_timer, this));
-
+  timer_ = create_wall_timer(dt_, std::bind(&DoubleVaddComponent::on_timer, this));
 }
 
-void DoubleVaddNode::on_timer()
+
+void DoubleVaddComponent::on_timer()
 {
   // randomize the vectors used
   for (int i = 0 ; i < DATA_SIZE ; i++) {
@@ -118,4 +115,4 @@ void DoubleVaddNode::on_timer()
 // Register the component with class_loader.
 // This acts as a sort of entry point, allowing the component to be discoverable when its library
 // is being loaded into a running process.
-RCLCPP_COMPONENTS_REGISTER_NODE(composition::DoubleVaddNode)
+RCLCPP_COMPONENTS_REGISTER_NODE(composition::DoubleVaddComponent)

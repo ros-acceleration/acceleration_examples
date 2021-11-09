@@ -95,7 +95,8 @@ public:
     // Parameter callback
     // NOTE: not available in Foxy
     //
-    // TODO: re-evaluate in the future
+    // TODO: re-evaluate in the future, see
+    // https://github.com/ros2/demos/blob/master/demo_nodes_cpp/src/parameters/parameter_event_handler.cpp#L83-L91
     //
     // // Now, create a parameter subscriber that can be used to monitor parameter changes on
     // // our own local node as well as other remote nodes

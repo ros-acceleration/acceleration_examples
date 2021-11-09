@@ -31,7 +31,7 @@ limitations under the License.
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<composition::DoubleVaddNode>(rclcpp::NodeOptions()));
+  rclcpp::spin(std::make_shared<composition::DoubleVaddComponent>(rclcpp::NodeOptions()));
   rclcpp::shutdown();
   return 0;
 }
