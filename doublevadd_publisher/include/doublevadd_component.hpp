@@ -37,15 +37,23 @@ limitations under the License.
 namespace composition
 {
 
-class DoubleVaddNode : public rclcpp::Node
+class DoubleVaddComponent : public rclcpp::Node
 {
 public:
-  explicit DoubleVaddNode(const rclcpp::NodeOptions & options);
+  explicit DoubleVaddComponent(const rclcpp::NodeOptions & options)
+      : Node("doublevadd_publisher", options), count_(0) {initialize();}
+
+  explicit DoubleVaddComponent(const std::string &node_name,
+                               const rclcpp::NodeOptions & options)
+      : Node(node_name, options), count_(0) {initialize();}
+
 
 protected:
   void on_timer();
 
 private:
+  void initialize();
+
   size_t count_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub_;
   rclcpp::TimerBase::SharedPtr timer_;

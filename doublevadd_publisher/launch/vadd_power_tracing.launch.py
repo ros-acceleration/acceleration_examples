@@ -58,7 +58,7 @@ def generate_launch_description():
             ),
             # ComposableNode(
             #     package="doublevadd_publisher",
-            #     plugin="composition::DoubleVaddNode",
+            #     plugin="composition::DoubleVaddComponent",
             #     name="doublevadd_publisher",
             # ),
         ],
