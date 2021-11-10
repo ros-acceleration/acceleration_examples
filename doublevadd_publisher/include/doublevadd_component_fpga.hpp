@@ -61,6 +61,8 @@ public:
 
   } // DoubleVaddComponentFPGA destructor
 
+  int publish_count_ = 0;
+
 protected:
   void on_timer();
   void init_fpga();
@@ -79,7 +81,6 @@ protected:
 private:
   void initialize(const rclcpp::NodeOptions & options);
 
-  size_t count_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub_;
   rclcpp::TimerBase::SharedPtr timer_;
   std::chrono::milliseconds dt_;
@@ -99,7 +100,7 @@ private:
   cl::CommandQueue *q_;
   cl::Kernel *krnl_vector_add_;
 
-  int publish_count_ = 0;
+  size_t count_;
   bool fpga_initialized_ = false;
 
   int argc_;

@@ -47,6 +47,7 @@ public:
                                const rclcpp::NodeOptions & options)
       : Node(node_name, options), count_(0) {initialize();}
 
+  int publish_count_ = 0;
 
 protected:
   void on_timer();
@@ -54,7 +55,6 @@ protected:
 private:
   void initialize();
 
-  size_t count_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub_;
   rclcpp::TimerBase::SharedPtr timer_;
   std::chrono::milliseconds dt_;
@@ -63,7 +63,7 @@ private:
   unsigned int in2_[DATA_SIZE];
   unsigned int out_[DATA_SIZE];
 
-  int publish_count_ = 0;
+  size_t count_;
 
 };
 

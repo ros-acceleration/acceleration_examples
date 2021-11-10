@@ -18,9 +18,6 @@ adaptive Node behaviors through parameters.
 */
 
 #include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/string.hpp"
-#include "vadd.hpp"
-
 #include "doublevadd_component.hpp"
 #include "doublevadd_component_fpga.hpp"
 #include "adaptive_component/adaptive_component.hpp"
