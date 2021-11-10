@@ -65,10 +65,10 @@ using namespace std::chrono_literals;  // NOLINT
 namespace composition
 {
 
-class DoubleVaddAdaptiveComponent : public rclcpp::Node
+class DoubleVaddNodeAdaptive : public rclcpp::Node
 {
 public:
-  DoubleVaddAdaptiveComponent(const rclcpp::NodeOptions & options)
+  DoubleVaddNodeAdaptive(const rclcpp::NodeOptions & options)
   : Node("doublevadd_publisher", options), count_(0)
   {
     // "adaptive" parameter,
@@ -84,7 +84,7 @@ public:
     dt_ = 100ms;  // 10 Hz
 
     // Use a timer to schedule periodic message publishing.
-    timer_ = create_wall_timer(dt_, std::bind(&DoubleVaddAdaptiveComponent::on_timer, this));
+    timer_ = create_wall_timer(dt_, std::bind(&DoubleVaddNodeAdaptive::on_timer, this));
 
     // Fetch arguments from rcl
     auto context = options.context();
@@ -114,9 +114,9 @@ public:
     //   };
     // auto handle1 = param_subscriber->add_parameter_callback(param_name, cb1);
 
-  }  // DoubleVaddAdaptiveComponent constructor
+  }  // DoubleVaddNodeAdaptive constructor
 
-  ~DoubleVaddAdaptiveComponent()
+  ~DoubleVaddNodeAdaptive()
   {
     // Free memory for OpenCL buffers
     delete in1_buf_;
@@ -127,7 +127,7 @@ public:
     delete q_;
     delete krnl_vector_add_;
 
-  }  // DoubleVaddAdaptiveComponent destructor
+  }  // DoubleVaddNodeAdaptive destructor
 
 protected:
   /// `init_fpga`
@@ -365,7 +365,7 @@ private:
   char **argv_;
   int adaptive_value_;
 
-};  // DoubleVaddAdaptiveComponent class
+};  // DoubleVaddNodeAdaptive class
 
 }  // namespace composition
 
@@ -374,13 +374,13 @@ private:
 // Register the component with class_loader.
 // This acts as a sort of entry point, allowing the component to be discoverable when its library
 // is being loaded into a running process.
-RCLCPP_COMPONENTS_REGISTER_NODE(composition::DoubleVaddAdaptiveComponent)
+RCLCPP_COMPONENTS_REGISTER_NODE(composition::DoubleVaddNodeAdaptive)
 
 
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<composition::DoubleVaddAdaptiveComponent>(rclcpp::NodeOptions()));
+  rclcpp::spin(std::make_shared<composition::DoubleVaddNodeAdaptive>(rclcpp::NodeOptions()));
   rclcpp::shutdown();
   return 0;
 }
