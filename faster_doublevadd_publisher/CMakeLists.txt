@@ -99,12 +99,14 @@ if(ROS_ACCELERATION)
     NAME vadd
     FILE src/vadd.cpp
     CONFIG src/kv260.cfg
+    CLOCK 100000000:vadd_accelerated
     INCLUDE
       include
     TYPE
       # sw_emu
       # hw_emu
       hw
+    LINK
     PACKAGE
   )
 

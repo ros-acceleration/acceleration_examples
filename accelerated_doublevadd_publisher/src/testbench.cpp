@@ -62,7 +62,7 @@ int main(int argc, char * argv[]) {
   }
 
   // Add vectors
-  vadd(in1, in2, out, DATA_SIZE);  // function subject to be accelerated
+  vadd_accelerated(in1, in2, out, DATA_SIZE);  // function subject to be accelerated
 
   // Validate operation
   check_vadd(in1, in2, out);

@@ -79,7 +79,8 @@ int main(int argc, char * argv[]) {
   cl::Program::Binaries bins{{fileBuf, fileBufSize}};
   cl::Program program(context, devices, bins, NULL, &err);
   cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err);
-  cl::Kernel krnl_vector_add(program, "vadd", &err);
+  // cl::Kernel krnl_vector_add(program, "vadd_slow", &err);
+  cl::Kernel krnl_vector_add(program, "vadd_accelerated", &err);
 
   // ------------------------------------------------------------------------
   // Step 2: Create buffers, map memory

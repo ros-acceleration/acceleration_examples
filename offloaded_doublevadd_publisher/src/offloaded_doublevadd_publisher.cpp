@@ -59,7 +59,7 @@ bool check_vadd(
 int main(int argc, char * argv[]) {
   // ROS 2 abstractions
   rclcpp::init(argc, argv);
-  auto node = rclcpp::Node::make_shared("accelerated_doublevadd_publisher");
+  auto node = rclcpp::Node::make_shared("offloaded_doublevadd_publisher");
   auto publisher = node->create_publisher<std_msgs::msg::String>("vector_acceleration", 10);
   auto publish_count = 0;
   std_msgs::msg::String message;
@@ -79,7 +79,7 @@ int main(int argc, char * argv[]) {
   cl::Program::Binaries bins{{fileBuf, fileBufSize}};
   cl::Program program(context, devices, bins, NULL, &err);
   cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err);
-  cl::Kernel krnl_vector_add(program, "vadd", &err);
+  cl::Kernel krnl_vector_add(program, "vadd_offloaded", &err);
 
   // ------------------------------------------------------------------------
   // Step 2: Create buffers, map memory

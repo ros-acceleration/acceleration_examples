@@ -17,6 +17,7 @@ from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
 from launch_ros.actions import Node
 
+
 def generate_launch_description():
 
     container = ComposableNodeContainer(
@@ -25,14 +26,13 @@ def generate_launch_description():
         package="rclcpp_components",
         executable="component_container",
         composable_node_descriptions=[
-
             # TODO: consider subclassing ComposableNode and creating an
             # AdaptiveNode class that allows for launch-time remapping of
             # names, topics, etc.
             ComposableNode(
-                package='image_proc_adaptive',
-                plugin='composition::ResizeNodeAdaptive',
-                name='ResizeNode_adaptive',
+                package="image_proc_adaptive",
+                plugin="composition::ResizeNodeAdaptive",
+                name="ResizeNode_adaptive",
             ),
             # ComposableNode(
             #     package="image_proc",
@@ -41,7 +41,7 @@ def generate_launch_description():
             # ),
             # ComposableNode(
             #     package="image_proc",
-            #     plugin="image_proc::ResizeNode",
+            #     plugin="image_proc::ResizeNodeFPGA",
             #     name="resize_fpga_node",
             # ),
         ],

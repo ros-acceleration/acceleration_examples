@@ -46,25 +46,26 @@ if(ROS_ACCELERATION)
     TESTBENCH
       src/testbench.cpp
     TOPFUNCTION
-      vadd
+      vadd_accelerated
     CLOCK
       4
     SYNTHESIS
   )
 
-
   # vadd kernel
   vitis_acceleration_kernel(
-    NAME vadd
+    NAME vadd_accelerated
     FILE src/vadd.cpp
     CONFIG src/kv260.cfg
     # CONFIG src/zcu102.cfg
+    CLOCK 100000000:vadd_accelerated
     INCLUDE
       include
     TYPE
       # sw_emu
       # hw_emu
       hw
+    LINK
     PACKAGE
   )
 endif()

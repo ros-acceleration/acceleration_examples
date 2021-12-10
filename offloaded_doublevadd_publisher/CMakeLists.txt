@@ -46,7 +46,7 @@ if(ROS_ACCELERATION)
     TESTBENCH
       src/testbench.cpp
     TOPFUNCTION
-      vadd
+      vadd_offloaded
     CLOCK
       4
     SYNTHESIS
@@ -55,7 +55,7 @@ if(ROS_ACCELERATION)
 
   # vadd kernel
   vitis_acceleration_kernel(
-    NAME vadd
+    NAME vadd_offloaded
     FILE src/vadd.cpp
     CONFIG src/kv260.cfg
     INCLUDE

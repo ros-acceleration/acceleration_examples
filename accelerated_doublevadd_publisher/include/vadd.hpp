@@ -7,7 +7,7 @@
 #define XILINX_EXAMPLES_VADD_PUBLISHER_INCLUDE_VADD_HPP_
 
 extern "C" {
-    void vadd(
+    void vadd_accelerated(
             const unsigned int *in1,  // Read-Only Vector 1
             const unsigned int *in2,  // Read-Only Vector 2
             unsigned int *out,        // Output Result
