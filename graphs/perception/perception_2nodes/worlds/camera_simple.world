@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<sdf version="1.5">
+  <world name="camera2">
+
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <!-- A ground plane -->
+    <include>
+      <uri>model://ground_plane</uri>
+      <pose>0 0 0 0 0 0</pose>
+    </include>
+
+    <!-- camera view -->
+    <gui>
+      <camera name="user_default">
+            <pose>0.556 -0.9132 0.8266 0 0.59 2.15</pose>
+      </camera>
+    </gui>
+
+    <!-- camera model -->
+    <include>
+      <uri>model://camera-plugin</uri>
+      <pose>0 -0.07266 0.3 0 1.1 0</pose>
+      <static>1</static>
+    </include>
+
+  </world>
+</sdf>

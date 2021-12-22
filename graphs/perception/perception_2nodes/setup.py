@@ -15,6 +15,8 @@ setup(
             "share/" + package_name + "/resource/data",
             glob("resource/data/*"),
         ),
+        ("share/" + package_name + "/worlds", glob("worlds/*.world")),
+        ("share/" + package_name + "/models/camera-plugin", glob("models/camera-plugin/*")),
     ],
     install_requires=["setuptools"],
     zip_safe=True,
