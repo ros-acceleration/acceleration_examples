@@ -16,7 +16,6 @@ find_package(std_msgs REQUIRED)
 find_package(OpenCL REQUIRED)
 find_package(Threads REQUIRED)
 find_package(vitis_common REQUIRED)
-find_package(tracetools REQUIRED)
 find_package(tracetools_acceleration REQUIRED)
 find_package(ament_vitis)
 
