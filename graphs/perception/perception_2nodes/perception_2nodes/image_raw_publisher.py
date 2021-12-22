@@ -31,9 +31,9 @@ class ImageRawPublisher(Node):
         Raw publisher routine (select this or calibration)
         """
         # set callback
-        # timer_period = 0.033  # seconds, 30 Hz approx
+        timer_period = 0.033  # seconds, 30 Hz approx
         # timer_period = 0.01  # seconds, 100 Hz approx
-        timer_period = 1.0  # seconds, 1 Hz approx
+        # timer_period = 1.0  # seconds, 1 Hz approx
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         # set reference default image_raw and camera_info data structures to publish

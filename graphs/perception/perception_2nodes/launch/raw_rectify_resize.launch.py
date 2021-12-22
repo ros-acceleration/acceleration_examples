@@ -30,6 +30,8 @@ from std_msgs.msg import String
 from sensor_msgs.msg import CameraInfo, Image
 from launch_ros.actions import ComposableNodeContainer, Node
 from launch_ros.descriptions import ComposableNode
+from tracetools_launch.action import Trace
+from tracetools_trace.tools.names import DEFAULT_EVENTS_ROS
 
 def generate_launch_description():
     """Generate launch description with multiple components."""
@@ -40,6 +42,15 @@ def generate_launch_description():
         executable="image_raw_publisher",
         name="image_raw_publisher",
         remappings=[("image_raw", "image")],
+    )
+
+    # Trace
+    trace = Trace(
+        session_name="raw_rectify_resize_pipeline",
+        events_ust=[
+            "ros2_image_pipeline:*",
+        ]
+        + DEFAULT_EVENTS_ROS,
     )
 
     perception_container = ComposableNodeContainer(
@@ -79,4 +90,4 @@ def generate_launch_description():
         ],
         output="screen",
     )
-    return launch.LaunchDescription([image_raw_publisher, perception_container])
+    return launch.LaunchDescription([trace, image_raw_publisher, perception_container])

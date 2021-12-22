@@ -2,6 +2,7 @@ from setuptools import setup
 import os
 from glob import glob
 
+
 package_name = "perception_2nodes"
 setup(
     name=package_name,
@@ -18,7 +19,7 @@ setup(
         ("share/" + package_name + "/worlds", glob("worlds/*.world")),
         ("share/" + package_name + "/models/camera-plugin", glob("models/camera-plugin/*")),
     ],
-    install_requires=["setuptools"],
+    install_requires=["setuptools", "wasabi"],
     zip_safe=True,
     author="Víctor Mayoral-Vilches",
     author_email="v.mayoralv@gmail.com",

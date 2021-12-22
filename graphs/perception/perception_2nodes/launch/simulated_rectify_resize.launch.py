@@ -30,13 +30,24 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
+from tracetools_launch.action import Trace
+from tracetools_trace.tools.names import DEFAULT_EVENTS_ROS
  
 def generate_launch_description():
- 
+     # Trace
+    trace = Trace(
+        session_name="raw_rectify_resize_pipeline",
+        events_ust=[
+            "ros2_image_pipeline:*",
+        ]
+        + DEFAULT_EVENTS_ROS,
+    )
+
     pkg_gazebo_ros = FindPackageShare(package='gazebo_ros').find('gazebo_ros')      
     pkg_share = FindPackageShare(package='perception_2nodes').find('perception_2nodes')
     # world_path = os.path.join(pkg_share, 'worlds', 'camera.world')
-    world_path = os.path.join(pkg_share, 'worlds', 'camera_dynamic.world')
+    # world_path = os.path.join(pkg_share, 'worlds', 'camera_dynamic.world')
+    world_path = os.path.join(pkg_share, 'worlds', 'camera_dynamic_undistorted.world')
     os.environ["GAZEBO_MODEL_PATH"] = os.path.join(pkg_share, 'models')
 
     # Launch configuration variables specific to simulation
@@ -120,6 +131,8 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        # LTTng tracing
+        trace,
         # arguments
         declare_simulator_cmd, 
         declare_use_sim_time_cmd,
