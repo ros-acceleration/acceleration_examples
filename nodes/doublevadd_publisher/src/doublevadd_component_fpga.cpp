@@ -22,6 +22,7 @@ that runs in the FPGA, adaptively.
 // #include <lttng/tracef.h>  // uncoment if using tracef
 #include "tracetools/tracetools.h"
 #include "tracetools_acceleration/tracetools.h"
+#include "rcl/context.h"
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/clock.hpp"
@@ -44,8 +45,11 @@ that runs in the FPGA, adaptively.
 
 
 // rcl_context_impl_s mapped to rcl_context_impl_t and defined
-// for internal uses at https://github.com/ros2/rcl/blob/master/rcl/src/rcl/context_impl.h#L29
-struct rcl_context_impl_t
+// for internal uses at https://github.com/ros2/rcl/blob/master/rcl/include/rcl/context.h#L46context_impl.h#L29
+// rcl_context_impl_s is defined at https://github.com/ros2/rcl/blob/master/rcl/src/rcl/.
+//
+// rcl doesn't export "rcl/context_impl.h" so we need to re-define the struct:
+struct rcl_context_impl_s
 {
   /// Allocator used during init and shutdown.
   rcl_allocator_t allocator;
