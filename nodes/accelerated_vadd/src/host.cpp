@@ -24,6 +24,7 @@
 #include <vitis_common/common/ros_opencl_120.hpp>
 #include <vitis_common/common/utilities.hpp>
 
+
 int main(int argc, char** argv)
 {
     std::cout << "INFO: Add accelerated vector example" << std::endl;

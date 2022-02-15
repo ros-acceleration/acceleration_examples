@@ -34,20 +34,11 @@ from tracetools_launch.action import Trace
 from tracetools_trace.tools.names import DEFAULT_EVENTS_ROS
  
 def generate_launch_description():
-     # Trace
-    trace = Trace(
-        session_name="raw_rectify_resize_pipeline",
-        events_ust=[
-            "ros2_image_pipeline:*",
-        ]
-        + DEFAULT_EVENTS_ROS,
-    )
-
     pkg_gazebo_ros = FindPackageShare(package='gazebo_ros').find('gazebo_ros')      
     pkg_share = FindPackageShare(package='perception_2nodes').find('perception_2nodes')
     # world_path = os.path.join(pkg_share, 'worlds', 'camera.world')
-    # world_path = os.path.join(pkg_share, 'worlds', 'camera_dynamic.world')
-    world_path = os.path.join(pkg_share, 'worlds', 'camera_dynamic_undistorted.world')
+    world_path = os.path.join(pkg_share, 'worlds', 'camera_dynamic.world')  # distorted
+    # world_path = os.path.join(pkg_share, 'worlds', 'camera_dynamic_undistorted.world')
     os.environ["GAZEBO_MODEL_PATH"] = os.path.join(pkg_share, 'models')
 
     # Launch configuration variables specific to simulation
@@ -87,46 +78,8 @@ def generate_launch_description():
     start_gazebo_client_cmd = IncludeLaunchDescription(
     PythonLaunchDescriptionSource(os.path.join(pkg_gazebo_ros, 'launch', 'gzclient.launch.py')),
     condition=IfCondition(PythonExpression([use_simulator, ' and not ', headless])))
- 
-    perception_container = ComposableNodeContainer(
-        name="perception_container",
-        namespace="",
-        package="rclcpp_components",
-        executable="component_container",
-        composable_node_descriptions=[
-            ComposableNode(
-                package="image_proc",
-                plugin="image_proc::RectifyNode",
-                name="rectify_node",
-                remappings=[
-                    ("image", "/camera/image_raw"),
-                    ("camera_info", "/camera/camera_info"),
-                ],
-            ),
-            ComposableNode(
-                namespace="resize",
-                package="image_proc",
-                plugin="image_proc::ResizeNode",
-                name="resize_node",
-                remappings=[
-                    ("camera_info", "/camera/camera_info"),
-                    ("image", "/image_rect"),
-                    ("resize", "resize"),
-                ],
-                parameters=[
-                    {
-                        "scale_height": 2.0,
-                        "scale_width": 2.0,
-                    }
-                ],
-            ),
-        ],
-        output="screen",
-    )
 
     return LaunchDescription([
-        # LTTng tracing
-        trace,
         # arguments
         declare_simulator_cmd, 
         declare_use_sim_time_cmd,
@@ -135,6 +88,4 @@ def generate_launch_description():
         # simulation
         start_gazebo_server_cmd,
         start_gazebo_client_cmd,
-        # image pipeline
-        perception_container
     ])

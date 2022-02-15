@@ -95,10 +95,11 @@ if(ROS_ACCELERATION)
 
   # vadd kernel
   vitis_acceleration_kernel(
-    NAME vadd
+    NAME vadd_faster
     FILE src/vadd.cpp
     CONFIG src/kv260.cfg
-    CLOCK 100000000:vadd_accelerated
+    CLOCK 100000000:vadd_faster
+    DTSI src/vadd_faster.dtsi
     INCLUDE
       include
     TYPE

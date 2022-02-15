@@ -1,19 +1,11 @@
-/*
-      ____  ____
-     /   /\/   /
-    /___/  \  /   Copyright (c) 2021, Xilinx®.
-    \   \   \/    Author: Víctor Mayoral Vilches <victorma@xilinx.com>
-     \   \
-     /   /
-    /___/   /\
-    \   \  /  \
-     \___\/\___\
+// Copyright (c) 2021, Xilinx®.
+// All rights reserved
+//
+// Inspired by the Vector-Add example.
+// See https://github.com/Xilinx/Vitis-Tutorials/blob/master/Getting_Started/Vitis
+//
+// Author: Víctor Mayoral Vilches <v.mayoralv@gmail.com>
 
- Inspired by the Vector-Add example.
- See https://github.com/Xilinx/Vitis-Tutorials/blob/master/Getting_Started/Vitis
-*/
-
-// #define DATA_SIZE 512  // 2**9
 #define DATA_SIZE 4096  // 2**12
 // #define DATA_SIZE 16384  // 2**14
 // #define DATA_SIZE 65536  // 2**16
@@ -25,12 +17,8 @@
 #include <string>
 #include <vector>
 
-#include "tracetools/tracetools.h"
-#include "tracetools_acceleration/tracetools.h"
-
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
-#include "vadd.hpp"
 
 #include <vitis_common/common/ros_opencl_120.hpp>
 #include <vitis_common/common/utilities.hpp>
@@ -70,7 +58,7 @@ bool check_vadd(
 int main(int argc, char * argv[]) {
   // ROS 2 abstractions
   rclcpp::init(argc, argv);
-  auto node = rclcpp::Node::make_shared("faster_doublevadd_publisher");
+  auto node = rclcpp::Node::make_shared("accelerated_doublevadd_publisher");
   auto publisher = node->create_publisher<std_msgs::msg::String>("vector_acceleration", 10);
   auto publish_count = 0;
   std_msgs::msg::String message;
@@ -80,7 +68,7 @@ int main(int argc, char * argv[]) {
   // Step 1: Initialize the OpenCL environment for acceleration
   // ------------------------------------------------------------------------
   cl_int err;
-  std::string binaryFile = (argc != 2) ? "vadd.xclbin" : argv[1];
+  std::string binaryFile = (argc < 2) ? "vadd.xclbin" : argv[1];
   unsigned fileBufSize;
   std::vector<cl::Device> devices = get_xilinx_devices();
   devices.resize(1);
@@ -90,7 +78,8 @@ int main(int argc, char * argv[]) {
   cl::Program::Binaries bins{{fileBuf, fileBufSize}};
   cl::Program program(context, devices, bins, NULL, &err);
   cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err);
-  cl::Kernel krnl_vector_add(program, "vadd_faster", &err);
+  // cl::Kernel krnl_vector_add(program, "vadd_slow", &err);
+  cl::Kernel krnl_vector_add(program, "vadd_accelerated", &err);
 
   // ------------------------------------------------------------------------
   // Step 2: Create buffers, map memory
@@ -126,7 +115,6 @@ int main(int argc, char * argv[]) {
         out[i] = 0;
     }
 
-    TRACEPOINT(vadd_pre, ("iteration: " + std::to_string(publish_count)).c_str());
     // Set kernel arguments
     krnl_vector_add.setArg(0, in1_buf);
     krnl_vector_add.setArg(1, in2_buf);
@@ -141,7 +129,6 @@ int main(int argc, char * argv[]) {
     q.enqueueMigrateMemObjects({out_buf}, CL_MIGRATE_MEM_OBJECT_HOST);
     // Wait for all scheduled operations to finish
     q.finish();
-    TRACEPOINT(vadd_post, ("iteration: " + std::to_string(publish_count)).c_str());
 
     // Validate operation in the PS
     check_vadd(in1, in2, out);

@@ -19,7 +19,7 @@ setup(
         ("share/" + package_name + "/worlds", glob("worlds/*.world")),
         ("share/" + package_name + "/models/camera-plugin", glob("models/camera-plugin/*")),
     ],
-    install_requires=["setuptools", "wasabi"],
+    install_requires=["setuptools"],
     zip_safe=True,
     author="Víctor Mayoral-Vilches",
     author_email="v.mayoralv@gmail.com",

@@ -20,7 +20,6 @@ find_package(ament_vitis)
 # find_package(tracetools_acceleration REQUIRED)
 find_package(adaptive_component REQUIRED)
 find_package(OpenCL REQUIRED)
-find_package(image_proc REQUIRED)
 
 include_directories(include)
 
@@ -30,6 +29,7 @@ set(node_plugins "")
 set(COMPONENT_AMENT_DEPENDENCIES
   rclcpp
   rclcpp_components
+  vitis_common
   # tracetools
   # tracetools_acceleration
 )

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(publisher_xilinx)
+project(image_pipeline_examples)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
@@ -12,26 +12,31 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(std_msgs REQUIRED)
+find_package(rclcpp_components REQUIRED)
+find_package(ament_vitis)
+find_package(image_proc REQUIRED)
+find_package(vitis_common REQUIRED)
+
+include_directories(include)
+
+# create ament index resource which references the libraries in the binary dir
+set(node_plugins "")
 
 # LTTng flame chart and graphs
 # see https://archive.eclipse.org/tracecompass/doc/stable/org.eclipse.tracecompass.doc.user/LTTng-UST-Analyses.html#Flame_Chart_View
 set(CMAKE_CXX_FLAGS "-g -O2 -finstrument-functions")
 
-add_executable(member_function_publisher member_function_publisher.cpp)
-ament_target_dependencies(member_function_publisher rclcpp std_msgs)
+# Node built with a "component"
+add_executable(rectify_node src/rectify_node.cpp)
+ament_target_dependencies(rectify_node rclcpp class_loader vitis_common image_proc)
 
+# targets
 install(TARGETS
-  member_function_publisher
+  rectify_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-endif()
-
-# Install launch files
+# Install launch files.
 install(DIRECTORY
   launch
   DESTINATION share/${PROJECT_NAME}

@@ -22,71 +22,33 @@
 
 import os
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
-from launch.conditions import IfCondition, UnlessCondition
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import Command, LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
 from tracetools_launch.action import Trace
 from tracetools_trace.tools.names import DEFAULT_EVENTS_ROS
+from tracetools_trace.tools.names import DEFAULT_EVENTS_KERNEL
+from tracetools_trace.tools.names import DEFAULT_CONTEXT
  
 def generate_launch_description():
      # Trace
     trace = Trace(
-        session_name="raw_rectify_resize_pipeline",
+        session_name="trace_rectify_resize",
         events_ust=[
             "ros2_image_pipeline:*",
+            # "lttng_ust_cyg_profile*",
+            # "lttng_ust_statedump*",
+            # "liblttng-ust-libc-wrapper",
         ]
         + DEFAULT_EVENTS_ROS,
+        context_fields={
+                'kernel': [],
+                'userspace': ['vpid', 'vtid', 'procname'],
+        },
+        # events_kernel=DEFAULT_EVENTS_KERNEL,
+        # context_names=DEFAULT_CONTEXT,
     )
-
-    pkg_gazebo_ros = FindPackageShare(package='gazebo_ros').find('gazebo_ros')      
-    pkg_share = FindPackageShare(package='perception_2nodes').find('perception_2nodes')
-    # world_path = os.path.join(pkg_share, 'worlds', 'camera.world')
-    # world_path = os.path.join(pkg_share, 'worlds', 'camera_dynamic.world')
-    world_path = os.path.join(pkg_share, 'worlds', 'camera_dynamic_undistorted.world')
-    os.environ["GAZEBO_MODEL_PATH"] = os.path.join(pkg_share, 'models')
-
-    # Launch configuration variables specific to simulation
-    headless = LaunchConfiguration('headless')
-    use_sim_time = LaunchConfiguration('use_sim_time')
-    use_simulator = LaunchConfiguration('use_simulator')
-    world = LaunchConfiguration('world')
-
-    # Launch arguments for simulation
-    declare_simulator_cmd = DeclareLaunchArgument(
-        name='headless',
-        default_value='False',
-        description='Whether to execute gzclient'
-    )
-    declare_use_sim_time_cmd = DeclareLaunchArgument(
-        name='use_sim_time',
-        default_value='true',
-        description='Use simulation (Gazebo) clock if true'
-    )
-    declare_use_simulator_cmd = DeclareLaunchArgument(
-        name='use_simulator',
-        default_value='True',
-        description='Whether to start the simulator'
-    )
-    declare_world_cmd = DeclareLaunchArgument(
-        name='world',
-        default_value=world_path,
-        description='Full path to the world model file to load'
-    )
-
-    # Gazebo server
-    start_gazebo_server_cmd = IncludeLaunchDescription(
-    PythonLaunchDescriptionSource(os.path.join(pkg_gazebo_ros, 'launch', 'gzserver.launch.py')),
-    condition=IfCondition(use_simulator),
-    launch_arguments={'world': world}.items())
-    # Gazebo client    
-    start_gazebo_client_cmd = IncludeLaunchDescription(
-    PythonLaunchDescriptionSource(os.path.join(pkg_gazebo_ros, 'launch', 'gzclient.launch.py')),
-    condition=IfCondition(PythonExpression([use_simulator, ' and not ', headless])))
  
     perception_container = ComposableNodeContainer(
         name="perception_container",
@@ -103,6 +65,7 @@ def generate_launch_description():
                     ("camera_info", "/camera/camera_info"),
                 ],
             ),
+
             ComposableNode(
                 namespace="resize",
                 package="image_proc",
@@ -127,14 +90,6 @@ def generate_launch_description():
     return LaunchDescription([
         # LTTng tracing
         trace,
-        # arguments
-        declare_simulator_cmd, 
-        declare_use_sim_time_cmd,
-        declare_use_simulator_cmd,
-        declare_world_cmd,
-        # simulation
-        start_gazebo_server_cmd,
-        start_gazebo_client_cmd,
         # image pipeline
         perception_container
     ])

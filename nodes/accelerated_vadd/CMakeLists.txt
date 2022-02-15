@@ -20,9 +20,13 @@ find_package(ament_vitis)
 add_executable(accelerated_vadd
   src/host.cpp
 )
+target_include_directories(accelerated_vadd PUBLIC include)
 target_link_libraries(accelerated_vadd
   ${OpenCL_LIBRARY}
   pthread
+)
+ament_target_dependencies(accelerated_vadd
+  vitis_common
 )
 
 if(ROS_ACCELERATION)
@@ -37,8 +41,9 @@ if(ROS_ACCELERATION)
       sw_emu
       # hw_emu
       # hw
-    PACKAGE
-  )
+      LINK
+      PACKAGE
+    )
 endif()
 
 install(TARGETS

@@ -64,6 +64,7 @@ if(ROS_ACCELERATION)
       # sw_emu
       # hw_emu
       hw
+    LINK
     PACKAGE
   )
 endif()

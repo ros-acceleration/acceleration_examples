@@ -20,63 +20,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Launch a raw image publisher, pipelined with rectify and resize"""
-
 import os
-import rclpy
-import launch
-from rclpy.node import Node
-from std_msgs.msg import String
-from sensor_msgs.msg import CameraInfo, Image
-from launch_ros.actions import ComposableNodeContainer, Node
+from launch import LaunchDescription
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
 from tracetools_launch.action import Trace
 from tracetools_trace.tools.names import DEFAULT_EVENTS_ROS
+from tracetools_trace.tools.names import DEFAULT_EVENTS_KERNEL
+from tracetools_trace.tools.names import DEFAULT_CONTEXT
 
+ 
 def generate_launch_description():
-    """Generate launch description with multiple components."""
-
-    # An image_raw publisher
-    image_raw_publisher = Node(
-        package="perception_2nodes",
-        executable="image_raw_publisher",
-        name="image_raw_publisher",
-        remappings=[("image_raw", "image")],
-    )
-
-    # Trace
+     # Trace
     trace = Trace(
-        session_name="raw_rectify_resize_pipeline",
+        session_name="trace_rectify_resize_fpga",
         events_ust=[
             "ros2_image_pipeline:*",
         ]
         + DEFAULT_EVENTS_ROS,
+        context_fields={
+                'kernel': [],
+                'userspace': ['vpid', 'vtid', 'procname'],
+        },
+        # events_kernel=DEFAULT_EVENTS_KERNEL,
     )
-
+ 
     perception_container = ComposableNodeContainer(
         name="perception_container",
         namespace="",
         package="rclcpp_components",
         executable="component_container",
         composable_node_descriptions=[
-            # ComposableNode(
-            #     package="image_proc",
-            #     plugin="image_proc::RectifyNodeFPGA",
-            #     name="rectify_node_fpga",
-            #     remappings=[("image", "image_raw")],
-            # ),
-            ComposableNode(
-                package="image_proc",
-                plugin="image_proc::RectifyNode",
-                name="rectify_node",
-            ),
             ComposableNode(
                 namespace="resize",
                 package="image_proc",
-                plugin="image_proc::ResizeNode",
-                name="resize_node",
+                plugin="image_proc::ResizeNodeFPGA",
+                name="resize_node_fpga",
                 remappings=[
-                    ("camera_info", "/camera_info"),
+                    ("camera_info", "/camera/camera_info"),
                     ("image", "/image_rect"),
                     ("resize", "resize"),
                 ],
@@ -86,12 +69,23 @@ def generate_launch_description():
                         "scale_width": 2.0,
                     }
                 ],
-            ),
+            ),            
+            ComposableNode(
+                package="image_proc",
+                plugin="image_proc::RectifyNodeFPGA",
+                name="rectify_node_fpga",
+                remappings=[
+                    ("image", "/camera/image_raw"),
+                    ("camera_info", "/camera/camera_info"),
+                ],
+            ),            
         ],
         output="screen",
     )
-    return launch.LaunchDescription([
-            # trace, 
-            image_raw_publisher, 
-            perception_container
-        ])
+
+    return LaunchDescription([
+        # LTTng tracing
+        trace,
+        # image pipeline
+        perception_container
+    ])

@@ -30,7 +30,6 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
-#include "vadd.hpp"
 
 #include <vitis_common/common/ros_opencl_120.hpp>
 #include <vitis_common/common/utilities.hpp>
@@ -80,7 +79,7 @@ int main(int argc, char * argv[]) {
   // Step 1: Initialize the OpenCL environment for acceleration
   // ------------------------------------------------------------------------
   cl_int err;
-  std::string binaryFile = (argc != 2) ? "vadd.xclbin" : argv[1];
+  std::string binaryFile = (argc < 2) ? "vadd.xclbin" : argv[1];
   unsigned fileBufSize;
   std::vector<cl::Device> devices = get_xilinx_devices();
   devices.resize(1);

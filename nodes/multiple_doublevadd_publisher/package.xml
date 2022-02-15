@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
+  <name>multiple_doublevadd_publisher</name>
+  <version>0.3.0</version>
+  <description>This package presents multiple double vector-add ROS 2 publishers
+    that adds two inputs to a vector in a loop and attempt publish them on the go 
+    at 10 Hz. Vector add operations are offloaded into to the FPGA and various HLS
+    pragmas are used to demonstrate hardware acceleration.
+
+    The package smashes various acceleration kernels into a single bitstream that
+    can then be used to program the FPGA, allowing to run various kernels without
+    reprogramming it.
+  </description>
+  <maintainer email="victorma@xilinx.com">Víctor Mayoral Vilches</maintainer>
+  <license>Apache License 2.0</license>
+  <author email="victorma@xilinx.com">Víctor Mayoral Vilches</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_vitis</buildtool_depend>
+
+  <depend>acceleration_firmware</depend>
+  <depend>tracetools</depend>
+  <depend>tracetools_acceleration</depend>
+
+  <build_depend>rclcpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>vitis_common</build_depend>
+
+  <exec_depend>rclcpp</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

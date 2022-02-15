@@ -34,24 +34,26 @@ if(ROS_ACCELERATION)
     SYNTHESIS
   )
 
-  # #---------------------
-  # # NOTE: uncomment if
-  # # hw kernel is desired
-  # #----------------------
-  #
-  # # kernel
-  # vitis_acceleration_kernel(
-  #   NAME simple_adder
-  #   FILE src/adder1.cpp
-  #   CONFIG src/kv260.cfg
-  #   INCLUDE
-  #     include
-  #   TYPE
-  #     # sw_emu
-  #     # hw_emu
-  #     hw
-  #   PACKAGE
-  # )
+  #---------------------
+  # NOTE: uncomment if
+  # hw kernel is desired
+  #----------------------
+  
+  # kernel
+  vitis_acceleration_kernel(
+    NAME simple_adder
+    FILE src/adder1.cpp
+    CONFIG src/kv260.cfg
+    CLOCK 100000000:vadd_accelerated
+    INCLUDE
+      include
+    TYPE
+      # sw_emu
+      # hw_emu
+      hw
+    LINK
+    PACKAGE
+  )
 endif()
 
 # cross-compilation
