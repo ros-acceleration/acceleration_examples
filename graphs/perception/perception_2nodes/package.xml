@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
   <name>perception_2nodes</name>
-  <version>0.2.0</version>
+  <version>0.3.0</version>
   <description>
     A simple perception computational graph composed by 2 Nodes.
     Used to demonstrate the value of accelerating image_pipeline

@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
   <name>image_proc_adaptive</name>
-  <version>0.1.0</version>
+  <version>0.3.0</version>
   <description>
     An example that makes use of the image_pipeline meta-package to demonstrate
     how to make a ROS 2 image_proc adaptive Component that can run either

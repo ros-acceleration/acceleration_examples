@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
   <name>accelerated_vadd</name>
-  <version>0.2.0</version>
+  <version>0.3.0</version>
   <description>A trivial vector-add example (NO ROS USED) that serves
     as a baseline for development and debugging. The computation
     sends two integer vectors and adds them.
