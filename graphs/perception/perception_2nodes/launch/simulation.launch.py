@@ -38,6 +38,7 @@ def generate_launch_description():
     pkg_share = FindPackageShare(package='perception_2nodes').find('perception_2nodes')
     # world_path = os.path.join(pkg_share, 'worlds', 'camera.world')
     world_path = os.path.join(pkg_share, 'worlds', 'camera_dynamic.world')  # distorted
+    # world_path = os.path.join(pkg_share, 'worlds', 'camera_dynamic_hd.world')  # distorted, hd
     # world_path = os.path.join(pkg_share, 'worlds', 'camera_dynamic_undistorted.world')
     os.environ["GAZEBO_MODEL_PATH"] = os.path.join(pkg_share, 'models')
 

@@ -35,7 +35,7 @@ from tracetools_trace.tools.names import DEFAULT_CONTEXT
 def generate_launch_description():
      # Trace
     trace = Trace(
-        session_name="trace_rectify_resize_fpga",
+        session_name="trace_rectify_resize_fpga_integrated",
         events_ust=[
             "ros2_image_pipeline:*",
         ]
@@ -46,49 +46,28 @@ def generate_launch_description():
         },
         # events_kernel=DEFAULT_EVENTS_KERNEL,
     )
- 
-    perception_container = ComposableNodeContainer(
-        name="perception_container",
-        namespace="",
-        package="rclcpp_components",
-        executable="component_container",
-        composable_node_descriptions=[    
-            ComposableNode(
-                namespace="acceleration/resize",
-                package="image_proc",
-                plugin="image_proc::ResizeNodeFPGA",
-                name="resize_node_fpga",
-                remappings=[
-                    ("camera_info", "/camera/camera_info"),
-                    ("image", "/acceleration/rectify/image_rect"),
-                    # ("image", "/camera/image_raw"),
-                    ("resize", "/resize"),
-                ],
-                parameters=[
-                    {
-                        "scale_height": 2.0,
-                        "scale_width": 2.0,
-                    }
-                ],
-            ),
-            ComposableNode(
-                namespace="acceleration/rectify",
-                package="image_proc",
-                plugin="image_proc::RectifyNodeFPGA",
-                name="rectify_node_fpga",
-                remappings=[
-                    ("image", "/camera/image_raw"),
-                    ("camera_info", "/camera/camera_info"),
-                    ("image_rect", "image_rect"),
-                ],
-            ),            
+
+    # An image_raw publisher
+    pipeline_node = Node(
+        package="image_pipeline_examples",
+        executable="rectify_resize_fpga_node",
+        name="rectify_resize_fpga_node",
+        remappings=[
+            ("image", "/camera/image_raw"),
+            ("camera_info", "/camera/camera_info"),
+            ("resize", "resize"),
         ],
-        output="screen",
+        parameters=[
+            {
+                "scale_height": 2.0,
+                "scale_width": 2.0,
+            }
+        ],
     )
 
     return LaunchDescription([
         # LTTng tracing
         trace,
         # image pipeline
-        perception_container
+        pipeline_node
     ])
