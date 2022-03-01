@@ -50,13 +50,14 @@ target_include_directories(rectify_resize_fpga_streamlined_node PUBLIC
   /usr/include/xrt  # TODO: replace with ROS 2 header-only library
 )
 
-add_executable(rectify_resize_fpga_streamlined_node_xrt src/rectify_resize_fpga_streamlined_node_xrt.cpp)
-ament_target_dependencies(rectify_resize_fpga_streamlined_node_xrt rclcpp class_loader vitis_common image_proc)
-target_include_directories(rectify_resize_fpga_streamlined_node_xrt PUBLIC
-  /home/xilinx/XRT/build/Debug/opt/xilinx/xrt/include  # TODO: replace with ROS 2 header-only library
-  /usr/include/xrt  # TODO: replace with ROS 2 header-only library
-)
-
+if (DEFINED ROS_XRT)
+  add_executable(rectify_resize_fpga_streamlined_node_xrt src/rectify_resize_fpga_streamlined_node_xrt.cpp)
+  ament_target_dependencies(rectify_resize_fpga_streamlined_node_xrt rclcpp class_loader vitis_common image_proc)
+  target_include_directories(rectify_resize_fpga_streamlined_node_xrt PUBLIC
+    /home/xilinx/XRT/build/Debug/opt/xilinx/xrt/include  # TODO: replace with ROS 2 header-only library
+    /usr/include/xrt  # TODO: replace with ROS 2 header-only library
+  )
+endif()
 
 add_executable(rectify_resize_fpga_integrated_streamlined_node src/rectify_resize_fpga_integrated_streamlined_node.cpp)
 ament_target_dependencies(rectify_resize_fpga_integrated_streamlined_node rclcpp class_loader vitis_common image_proc)
@@ -66,19 +67,25 @@ target_include_directories(rectify_resize_fpga_integrated_streamlined_node PUBLI
 )
 
 # targets
-install(TARGETS
+set (install_targets
   rectify_node
   rectify_resize_fpga_node
   rectify_resize_fpga_integrated_node
   rectify_resize_fpga_streamlined_node
-  rectify_resize_fpga_streamlined_node_xrt
-  rectify_resize_fpga_integrated_streamlined_node
+  rectify_resize_fpga_integrated_streamlined_node)
+
+if (DEFINED ROS_XRT)  
+  set (install_targets ${install_targets} rectify_resize_fpga_streamlined_node_xrt)
+endif()  
+
+install(
+  TARGETS ${install_targets}
   DESTINATION lib/${PROJECT_NAME}
 )
 
 # Install launch files.
-install(DIRECTORY
-  launch
+install(
+  DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}
 )
 
