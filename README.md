@@ -60,4 +60,3 @@ In turn, a CI system will be set to build the meta-package against all suported 
 ### Quality Declaration
 
 No quality is claimed according to [REP-2004](https://www.ros.org/reps/rep-2004.html). This meta-package is designed as a learning and reference resource and it should not be used in production environments.
-

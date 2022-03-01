@@ -170,6 +170,53 @@ def msgsets_from_trace(tracename):
             new_set = []  # restart
     return image_pipeline_msg_sets
 
+
+# def msgsets_from_trace_start_end_streamlined(tracename):
+#     """ 
+#     Fetches start-end messages for the streamlining case
+#     """
+#     global target_chain
+
+#     # Create a trace collection message iterator from the first command-line
+#     # argument.
+#     msg_it = bt2.TraceCollectionMessageIterator(tracename)
+
+#     # Iterate the trace messages and pick ros2 ones
+#     image_pipeline_msgs = []
+#     for msg in msg_it:
+#         # `bt2._EventMessageConst` is the Python type of an event message.
+#         if type(msg) is bt2._EventMessageConst:
+#             # An event message holds a trace event.
+#             event = msg.event
+#             # Only check `sched_switch` events.
+#             if ("ros2" in event.name):
+#                 image_pipeline_msgs.append(msg)
+
+#     # Form sets with each pipeline
+#     image_pipeline_msg_sets = []
+#     new_set = []  # used to track new complete sets
+#     chain_index = 0  # track where in the chain we are so far
+#     vpid_chain = -1  # used to track a set and differentiate from other callbacks
+
+#     for index in range(len(image_pipeline_msgs)):
+#         # first one
+#         if image_pipeline_msgs[index].event.name == "ros2:callback_start" and \
+#             image_pipeline_msgs[index].event.common_context_field.get("vpid") == image_pipeline_msgs[index].event.common_context_field.get("vtid"):            
+#             new_set.append(image_pipeline_msgs[index])
+
+#         # last one
+#         elif image_pipeline_msgs[index].event.name == "ros2:callback_end" and \
+#             image_pipeline_msgs[index].event.common_context_field.get("vpid") != image_pipeline_msgs[index].event.common_context_field.get("vtid"):
+#             new_set.append(image_pipeline_msgs[index])
+#             image_pipeline_msg_sets.append(new_set)
+#             new_set = []  # restart
+
+#         elif image_pipeline_msgs[index].event.name == "ros2:callback_end" and \
+#             image_pipeline_msgs[index].event.common_context_field.get("vpid") != image_pipeline_msgs[index].event.common_context_field.get("vtid"):
+
+#     return image_pipeline_msg_sets
+
+
 def msgsets_from_trace_concurrent(tracename):
     global target_chain
 
@@ -1148,6 +1195,18 @@ for i_set in range(len(image_pipeline_msg_sets_ms_fpga_streamlined_xrt)):
     image_pipeline_msg_sets_ms_fpga_streamlined_xrt[i_set] = [0, 0, 0, 0, 0, 0, 0, 0, 0] + image_pipeline_msg_sets_ms_fpga_streamlined_xrt[i_set]
 
 
+target_chain = [
+    "ros2:callback_start", "ros2_image_pipeline:image_proc_rectify_cb_init",
+    "ros2_image_pipeline:image_proc_rectify_init", "ros2_image_pipeline:image_proc_rectify_fini",    
+    "ros2_image_pipeline:image_proc_rectify_cb_fini", "ros2:callback_end",
+]
+
+image_pipeline_msg_sets_ms_fpga_streamlined_rectify = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
+    + "/.ros/tracing/trace_rectify_resize_fpga_streamlined")[discard_count:])
+# fix data of "*_integrated" to align with dimensions of the rest
+for i_set in range(len(image_pipeline_msg_sets_ms_fpga_streamlined_rectify)):
+    image_pipeline_msg_sets_ms_fpga_streamlined_rectify[i_set] = image_pipeline_msg_sets_ms_fpga_streamlined_rectify[i_set] + [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
 
 # image_pipeline_msg_sets_ms_fpga_integrated = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
 #     + "/.ros/tracing/trace_rectify_resize_fpga_integrated")[discard_count:])
@@ -1267,11 +1326,14 @@ for i_set in range(len(image_pipeline_msg_sets_ms_fpga_streamlined_xrt)):
 df_cpu_mean = pd.DataFrame(image_pipeline_msg_sets_ms_cpu).mean()
 df_fpga_mean = pd.DataFrame(image_pipeline_msg_sets_ms_fpga).mean()
 df_fpga_mean_streamlined = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_streamlined).mean()
+df_fpga_mean_streamlined_rectify = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_streamlined_rectify).mean()
+
 df_fpga_mean_streamlined_xrt = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_streamlined_xrt).mean()
 df_fpga_integrated_mean = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated).mean()
 df_fpga_integrated_mean_xrt = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_xrt).mean()
 df_fpga_integrated_streamlined_mean = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_streamlined).mean()
 df_fpga_integrated_streamlined_mean_xrt = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_streamlined_xrt).mean()
+
 
 
 df_cpu_mean_stress = pd.DataFrame(image_pipeline_msg_sets_ms_cpu_stress).mean()
@@ -1295,49 +1357,59 @@ df_fpga_integrated_streamlined_mean_xrt_stress = pd.DataFrame(image_pipeline_msg
 # df_fpga_integrated_mean_250_new = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_250_new).mean()
 # df_fpga_integrated_mean_250_node = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_250_node).mean()
 
-df_mean = pd.concat(
-    [
-        # full pipeline
-        df_cpu_mean,
-        # df_fpga_mean,
-        # # integrated
-        # df_fpga_integrated_mean,
-        # df_fpga_integrated_mean_xrt,
-        # streamlined
-        df_fpga_mean_streamlined,
-        # df_fpga_mean_streamlined_xrt,
-        # # integrated, streamlined
-        # df_fpga_integrated_streamlined_mean,
-        # df_fpga_integrated_streamlined_mean_xrt,
-    ], axis=1).transpose()
-df_mean.columns = target_chain_dissambiguous
-substrates = pd.DataFrame({'substrate':
-    [
-        # full pipeline
-        "CPU",
-        # "FPGA @ 250 MHz",
-        # # integrated
-        # "FPGA, integrated @ 250 MHz",
-        # "FPGA, integrated, XRT @ 250 MHz",
-        # streamlined
-        "FPGA, streams (resize) @ 250 MHz",
-        # "FPGA, streams (resize), XRT @ 250 MHz",
-        # # integrated, streamlined
-        # "FPGA, integrated, streams @ 250 MHz",
-        # "FPGA, integrated, streams, XRT @ 250 MHz",
-    ]})
-df_mean = df_mean.join(substrates)
+print(target_chain_dissambiguous)
+print("CPU: " + str(list(df_cpu_mean)))
+print("FPGA @ 250 MHz: " + str(list(df_fpga_mean)))
+print("FPGA, integrated @ 250 MHz: " + str(list(df_fpga_integrated_mean)))
+print("FPGA, streams (resize) @ 250 MHz: " + str(list(df_fpga_mean_streamlined)))
 
-import plotly.express as px
-fig = px.bar(
-    df_mean,
-    template="plotly_white",
-    x="substrate",
-    y=target_chain_dissambiguous,
-    color_discrete_sequence=px.colors.sequential.Inferno + px.colors.diverging.BrBG,
-    # colors at https://plotly.com/python/discrete-color/
-)
-fig.update_xaxes(title_text = "")
-fig.update_yaxes(title_text = "Milliseconds")
-fig.show()
-# fig.write_image("/tmp/benchmarkintegrated_only.png", width=1400, height=1000)
+
+
+# df_mean = pd.concat(
+#     [
+#         # full pipeline
+#         df_cpu_mean,
+#         # df_fpga_mean,
+#         # # integrated
+#         # df_fpga_integrated_mean,
+#         # df_fpga_integrated_mean_xrt,
+#         # streamlined
+#         df_fpga_mean_streamlined,
+#         df_fpga_mean_streamlined_rectify,
+#         # df_fpga_mean_streamlined_xrt,
+#         # # integrated, streamlined
+#         # df_fpga_integrated_streamlined_mean,
+#         # df_fpga_integrated_streamlined_mean_xrt,
+#     ], axis=1).transpose()
+# df_mean.columns = target_chain_dissambiguous
+# substrates = pd.DataFrame({'substrate':
+#     [
+#         # full pipeline
+#         "CPU",
+#         # "FPGA @ 250 MHz",
+#         # # integrated
+#         # "FPGA, integrated @ 250 MHz",
+#         # "FPGA, integrated, XRT @ 250 MHz",
+#         # streamlined
+#         "FPGA, streams (resize) @ 250 MHz",
+#         "FPGA, streams (rectify) @ 250 MHz",
+#         # "FPGA, streams (resize), XRT @ 250 MHz",
+#         # # integrated, streamlined
+#         # "FPGA, integrated, streams @ 250 MHz",
+#         # "FPGA, integrated, streams, XRT @ 250 MHz",
+#     ]})
+# df_mean = df_mean.join(substrates)
+
+# import plotly.express as px
+# fig = px.bar(
+#     df_mean,
+#     template="plotly_white",
+#     x="substrate",
+#     y=target_chain_dissambiguous,
+#     color_discrete_sequence=px.colors.sequential.Inferno + px.colors.diverging.BrBG,
+#     # colors at https://plotly.com/python/discrete-color/
+# )
+# fig.update_xaxes(title_text = "")
+# fig.update_yaxes(title_text = "Milliseconds")
+# fig.show()
+# # fig.write_image("/tmp/benchmarkintegrated_only.png", width=1400, height=1000)
