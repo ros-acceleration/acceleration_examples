@@ -26,6 +26,7 @@
   <buildtool_depend>ament_vitis</buildtool_depend>
   
   <depend>acceleration_firmware_kv260</depend>
+  <depend>vitis_common</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
