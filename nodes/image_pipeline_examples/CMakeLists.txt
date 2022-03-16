@@ -14,8 +14,8 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(ament_vitis)
+find_package(ament_cuda)  # enable CUDA capabilities, if available
 find_package(image_proc REQUIRED)
-find_package(vitis_common REQUIRED)
 
 include_directories(include)
 
@@ -28,55 +28,85 @@ set(CMAKE_CXX_FLAGS "-g -O2 -finstrument-functions")
 
 # Node built with a "component"
 add_executable(rectify_node src/rectify_node.cpp)
-ament_target_dependencies(rectify_node rclcpp class_loader vitis_common image_proc)
+ament_target_dependencies(rectify_node rclcpp class_loader image_proc)
 
-add_executable(rectify_resize_fpga_node src/rectify_resize_fpga_node.cpp)
-ament_target_dependencies(rectify_resize_fpga_node rclcpp class_loader vitis_common image_proc)
-target_include_directories(rectify_resize_fpga_node PUBLIC
-)
+add_executable(rectify_resize_node src/rectify_resize_node.cpp)
+ament_target_dependencies(rectify_resize_node rclcpp class_loader image_proc)
 
-add_executable(rectify_resize_fpga_integrated_node src/rectify_resize_fpga_integrated_node.cpp)
-ament_target_dependencies(rectify_resize_fpga_integrated_node rclcpp class_loader vitis_common image_proc)
-target_include_directories(rectify_resize_fpga_integrated_node PUBLIC
-  /home/xilinx/XRT/build/Debug/opt/xilinx/xrt/include  # TODO: replace with ROS 2 header-only library
-  /usr/include/xrt  # TODO: replace with ROS 2 header-only library
-)
+if (ROS_CUDA)
+  find_package(isaac_ros_image_proc REQUIRED)
 
+  add_executable(rectify_resize_gpu_node src/rectify_resize_gpu_node.cpp)
+  # ament_target_dependencies(rectify_resize_gpu_node rclcpp class_loader image_proc)
+  ament_target_dependencies(rectify_resize_gpu_node rclcpp class_loader isaac_ros_image_proc)
+  target_include_directories(rectify_resize_gpu_node PUBLIC
+        # /home/nvidia/nvidia_ws/src/image_common/image_transport/include
+        ${CMAKE_SYSROOT}/opt/nvidia/vpi1/include
+  )
+endif()  # ROS_CUDA
 
-add_executable(rectify_resize_fpga_streamlined_node src/rectify_resize_fpga_streamlined_node.cpp)
-ament_target_dependencies(rectify_resize_fpga_streamlined_node rclcpp class_loader vitis_common image_proc)
-target_include_directories(rectify_resize_fpga_streamlined_node PUBLIC
-  /home/xilinx/XRT/build/Debug/opt/xilinx/xrt/include  # TODO: replace with ROS 2 header-only library
-  /usr/include/xrt  # TODO: replace with ROS 2 header-only library
-)
+if (ROS_VITIS) 
+  find_package(vitis_common REQUIRED)
 
-if (DEFINED ROS_XRT)
-  add_executable(rectify_resize_fpga_streamlined_node_xrt src/rectify_resize_fpga_streamlined_node_xrt.cpp)
-  ament_target_dependencies(rectify_resize_fpga_streamlined_node_xrt rclcpp class_loader vitis_common image_proc)
-  target_include_directories(rectify_resize_fpga_streamlined_node_xrt PUBLIC
+  add_executable(rectify_resize_fpga_node src/rectify_resize_fpga_node.cpp)
+  ament_target_dependencies(rectify_resize_fpga_node rclcpp class_loader vitis_common image_proc)
+  target_include_directories(rectify_resize_fpga_node PUBLIC
+  )
+
+  add_executable(rectify_resize_fpga_integrated_node src/rectify_resize_fpga_integrated_node.cpp)
+  ament_target_dependencies(rectify_resize_fpga_integrated_node rclcpp class_loader vitis_common image_proc)
+  target_include_directories(rectify_resize_fpga_integrated_node PUBLIC
     /home/xilinx/XRT/build/Debug/opt/xilinx/xrt/include  # TODO: replace with ROS 2 header-only library
     /usr/include/xrt  # TODO: replace with ROS 2 header-only library
   )
-endif()
 
-add_executable(rectify_resize_fpga_integrated_streamlined_node src/rectify_resize_fpga_integrated_streamlined_node.cpp)
-ament_target_dependencies(rectify_resize_fpga_integrated_streamlined_node rclcpp class_loader vitis_common image_proc)
-target_include_directories(rectify_resize_fpga_integrated_streamlined_node PUBLIC
-  /home/xilinx/XRT/build/Debug/opt/xilinx/xrt/include  # TODO: replace with ROS 2 header-only library
-  /usr/include/xrt  # TODO: replace with ROS 2 header-only library
-)
+
+  add_executable(rectify_resize_fpga_streamlined_node src/rectify_resize_fpga_streamlined_node.cpp)
+  ament_target_dependencies(rectify_resize_fpga_streamlined_node rclcpp class_loader vitis_common image_proc)
+  target_include_directories(rectify_resize_fpga_streamlined_node PUBLIC
+    /home/xilinx/XRT/build/Debug/opt/xilinx/xrt/include  # TODO: replace with ROS 2 header-only library
+    /usr/include/xrt  # TODO: replace with ROS 2 header-only library
+  )
+
+  if (DEFINED ROS_XRT)
+    add_executable(rectify_resize_fpga_streamlined_node_xrt src/rectify_resize_fpga_streamlined_node_xrt.cpp)
+    ament_target_dependencies(rectify_resize_fpga_streamlined_node_xrt rclcpp class_loader vitis_common image_proc)
+    target_include_directories(rectify_resize_fpga_streamlined_node_xrt PUBLIC
+      /home/xilinx/XRT/build/Debug/opt/xilinx/xrt/include  # TODO: replace with ROS 2 header-only library
+      /usr/include/xrt  # TODO: replace with ROS 2 header-only library
+    )
+  endif()  # ROS_XRT
+
+  add_executable(rectify_resize_fpga_integrated_streamlined_node src/rectify_resize_fpga_integrated_streamlined_node.cpp)
+  ament_target_dependencies(rectify_resize_fpga_integrated_streamlined_node rclcpp class_loader vitis_common image_proc)
+  target_include_directories(rectify_resize_fpga_integrated_streamlined_node PUBLIC
+    /home/xilinx/XRT/build/Debug/opt/xilinx/xrt/include  # TODO: replace with ROS 2 header-only library
+    /usr/include/xrt  # TODO: replace with ROS 2 header-only library
+  )
+endif()  # ROS_VITIS
 
 # targets
 set (install_targets
   rectify_node
-  rectify_resize_fpga_node
-  rectify_resize_fpga_integrated_node
-  rectify_resize_fpga_streamlined_node
-  rectify_resize_fpga_integrated_streamlined_node)
+  rectify_resize_node
+)
 
-if (DEFINED ROS_XRT)  
-  set (install_targets ${install_targets} rectify_resize_fpga_streamlined_node_xrt)
-endif()  
+if (DEFINED ROS_CUDA)
+  set(install_targets ${install_targets} rectify_resize_gpu_node)
+endif()  # ROS_CUDA
+
+if (DEFINED ROS_XRT)
+  set(install_targets ${install_targets} rectify_resize_fpga_streamlined_node_xrt)
+endif()  # ROS_XRT
+
+if (DEFINED ROS_VITIS)
+  set (install_targets ${install_targets} 
+    rectify_resize_fpga_node 
+    rectify_resize_fpga_integrated_node
+    rectify_resize_fpga_streamlined_node
+    rectify_resize_fpga_integrated_streamlined_node
+  )
+endif()  # ROS_VITIS
 
 install(
   TARGETS ${install_targets}

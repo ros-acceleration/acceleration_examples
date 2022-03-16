@@ -57,7 +57,7 @@ if($ENV{ROS_DISTRO} MATCHES "rolling")
   set(node_plugins "${node_plugins}composition::DoubleVaddTypeAdapter;$<TARGET_FILE:doublevadd_component_typeadapter>\n")
 endif()
 
-if(ROS_ACCELERATION)
+if(ROS_VITIS)
   ## FPGA component
   find_package(OpenCL REQUIRED)
   find_package(vitis_common REQUIRED)
@@ -99,7 +99,7 @@ if(ROS_ACCELERATION)
   ament_target_dependencies(doublevadd_component_adaptive_stateful ${COMPONENT_AMENT_DEPENDENCIES})
   rclcpp_components_register_nodes(doublevadd_component_adaptive_stateful "composition::DoubleVaddComponentAdaptiveStateful")
   set(node_plugins "${node_plugins}composition::DoubleVaddComponentAdaptiveStateful;$<TARGET_FILE:doublevadd_component_adaptive_stateful>\n")
-endif()
+endif()  # ROS_VITIS
 
 
 #################
@@ -121,7 +121,7 @@ ament_target_dependencies(doublevadd_node rclcpp class_loader)
 # rosidl_target_interfaces(doublevadd_node
 #       ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
-if(ROS_ACCELERATION)
+if(ROS_VITIS)
   find_package(OpenCL REQUIRED)
   find_package(vitis_common REQUIRED)
 
@@ -173,7 +173,7 @@ if(ROS_ACCELERATION)
       ament_target_dependencies(doublevadd_publisher_adaptive_with_components_and_state
         class_loader)
 
-endif()
+endif()  # ROS_VITIS
 
 if(ROS_ACCELERATION)
   # C simulation and synthesis
@@ -194,46 +194,46 @@ if(ROS_ACCELERATION)
   )
 endif()
 
-# install targets and components
-if(ROS_ACCELERATION)
-  install(TARGETS
-    doublevadd_publisher
+
+# install
+set(install_targets
+  doublevadd_publisher
+  doublevadd_node
+)
+set(install_components
+  doublevadd_component
+  doublevadd_component_typeadapter  # re-enable with Rolling
+)
+
+
+if (DEFINED ROS_VITIS)
+  set (install_targets ${install_targets} 
     doublevadd_publisher_adaptive
     doublevadd_publisher_adaptive_with_components
     doublevadd_publisher_adaptive_with_components_and_state
-    doublevadd_node
     doublevadd_node_adaptive
-    DESTINATION lib/${PROJECT_NAME}
   )
-
-  # install components
-  install(TARGETS
-    doublevadd_component
+  set (install_components ${install_components} 
     doublevadd_component_fpga
     doublevadd_component_adaptive
     doublevadd_component_adaptive_stateful
-    # doublevadd_component_typeadapter  # re-enable with Rolling
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin)
-
-else()
-  # targets
-  install(TARGETS
-    doublevadd_publisher
-    doublevadd_node
-    DESTINATION lib/${PROJECT_NAME}
   )
+endif()  # ROS_VITIS
 
-  # install components
-  install(TARGETS
-    doublevadd_component
-    # doublevadd_component_typeadapter  # re-enable with Rolling
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin)
+# install targets
+install(TARGETS
+  ${install_targets}
+  DESTINATION lib/${PROJECT_NAME}
+)
 
-endif()
+# install components
+install(TARGETS
+  ${install_components}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

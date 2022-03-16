@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
+  <name>perception_3nodes</name>
+  <version>0.3.0</version>
+  <description>
+    Builds on top of the perception_2nodes package providing
+    a simple perception computational graph composed by 3 Nodes
+    that apply distortion rectification, resizing and corner 
+    detection (harris) operations over a raw image dataflow.
+    The computational graph is meant to produce an information flow 
+    that's useful to find matching points (corners) between images 
+    in the dataflow to extract relevant information from them. 
+    
+    Any postprocessing operations (e.g. motion tracking) to extract 
+    information is beyond the scope of this simple graph and might 
+    be implemented in future examples.
+  </description>
+  <maintainer email="victor@accelerationrobotics.com">Víctor Mayoral Vilches</maintainer>
+  <license>Apache License 2.0</license>
+  <author email="victor@accelerationrobotics.com">Víctor Mayoral Vilches</author>
+
+  <buildtool_depend>ament_cmake_auto</buildtool_depend>
+  <buildtool_depend>ament_vitis</buildtool_depend>
+  <buildtool_depend>ament_cuda</buildtool_depend>
+
+  <build_depend>acceleration_firmware</build_depend>
+  <depend>image_proc</depend>
+  <depend>isaac_ros_image_proc</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
+  <depend>tracetools_image_pipeline</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
