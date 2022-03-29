@@ -1,20 +1,12 @@
-#       ____  ____
-#      /   /\/   /
-#     /___/  \  /   Copyright (c) 2021, Xilinx®.
-#     \   \   \/    Author: Víctor Mayoral Vilches <victorma@xilinx.com>
-#      \   \
-#      /   /
-#     /___/   /\
-#     \   \  /  \
-#      \___\/\___\
-#
-#
+# Copyright 2022 Víctor Mayoral-Vilches
+# All rights reserved.
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#
+
 #     http://www.apache.org/licenses/LICENSE-2.0
-#
+
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,6 +37,24 @@ from bokeh.models.annotations import Label
 # debug = True  # debug flag, set to True if desired
 
 def get_change(first, second):
+    """_summary_
+
+    Args:
+        first (float): the accelerated value
+        second (float): the baseline
+
+    Returns:
+        float: speedup
+    """
+    if first == second:
+        return 0
+    try:
+        # return (abs(first - second) / second) * 100.0
+        return second/first
+    except ZeroDivisionError:
+        return float("inf")
+
+def get_change_percentage(first, second):
     """
     Get change in percentage between two values
     """
@@ -170,58 +180,23 @@ def msgsets_from_trace(tracename):
             new_set = []  # restart
     return image_pipeline_msg_sets
 
+def msgsets_from_trace_concurrent(tracename, endorder=9, debug=False):
+    """Get msg sets from trace in a concurrent manner
 
-# def msgsets_from_trace_start_end_streamlined(tracename):
-#     """ 
-#     Fetches start-end messages for the streamlining case
-#     """
-#     global target_chain
+    Args:
+        tracename (_type_): _description_
+        endorder (int, optional): Position at which each combination ends 
+            (typically denoted by ros2:callback_end). Defaults to 9.
+        debug (bool, optional): Whether or not to print out debug information. 
+            Defaults to False.
 
-#     # Create a trace collection message iterator from the first command-line
-#     # argument.
-#     msg_it = bt2.TraceCollectionMessageIterator(tracename)
-
-#     # Iterate the trace messages and pick ros2 ones
-#     image_pipeline_msgs = []
-#     for msg in msg_it:
-#         # `bt2._EventMessageConst` is the Python type of an event message.
-#         if type(msg) is bt2._EventMessageConst:
-#             # An event message holds a trace event.
-#             event = msg.event
-#             # Only check `sched_switch` events.
-#             if ("ros2" in event.name):
-#                 image_pipeline_msgs.append(msg)
-
-#     # Form sets with each pipeline
-#     image_pipeline_msg_sets = []
-#     new_set = []  # used to track new complete sets
-#     chain_index = 0  # track where in the chain we are so far
-#     vpid_chain = -1  # used to track a set and differentiate from other callbacks
-
-#     for index in range(len(image_pipeline_msgs)):
-#         # first one
-#         if image_pipeline_msgs[index].event.name == "ros2:callback_start" and \
-#             image_pipeline_msgs[index].event.common_context_field.get("vpid") == image_pipeline_msgs[index].event.common_context_field.get("vtid"):            
-#             new_set.append(image_pipeline_msgs[index])
-
-#         # last one
-#         elif image_pipeline_msgs[index].event.name == "ros2:callback_end" and \
-#             image_pipeline_msgs[index].event.common_context_field.get("vpid") != image_pipeline_msgs[index].event.common_context_field.get("vtid"):
-#             new_set.append(image_pipeline_msgs[index])
-#             image_pipeline_msg_sets.append(new_set)
-#             new_set = []  # restart
-
-#         elif image_pipeline_msgs[index].event.name == "ros2:callback_end" and \
-#             image_pipeline_msgs[index].event.common_context_field.get("vpid") != image_pipeline_msgs[index].event.common_context_field.get("vtid"):
-
-#     return image_pipeline_msg_sets
-
-
-def msgsets_from_trace_concurrent(tracename, endorder=9):
+    Returns:
+        _type_: list of msg sets
+    """
     global target_chain
 
     # NOTE: considered chains of "ros2:rclcpp_publish" roughly
-
+    
     # Create a trace collection message iterator from the first command-line
     # argument.
     msg_it = bt2.TraceCollectionMessageIterator(tracename)
@@ -247,56 +222,79 @@ def msgsets_from_trace_concurrent(tracename, endorder=9):
         vtid = trace.event.common_context_field.get("vtid")
         if trace.event.name == target_chain[0]:
             if (vtid in candidates) and (candidates[vtid][-1].event.name ==  target_chain[-1]):  # account for chained traces, use "ros2:callback_end"
-                # print(color("Continuing: " + str(trace.event.name), fg="green"))
+                if debug:
+                    print(color("Continuing: " + str(trace.event.name), fg="green"))
                 candidates[vtid].append(trace)
             elif vtid in candidates:
-                # print(color("Already a set, re-starting: " + str(trace.event.name) + " - " \
-                #     + str([x.event.name for x in candidates[vtid]]) , fg="yellow"))
+                if debug:
+                    print(color("Already a set, re-starting: " + str(trace.event.name) + " - " \
+                        + str([x.event.name for x in candidates[vtid]]) , fg="yellow"))
                 candidates[vtid] = [trace]  # already a set existing (pop and) re-start
             else:
                 candidates[vtid] = [trace]  # new set
-                # print(color("New: " + str(trace.event.name) + " - " + \
-                #     str([x.event.name for x in candidates[vtid]]), fg="blue"))
+                if debug:
+                    print(color("New: " + str(trace.event.name) + " - " + \
+                        str([x.event.name for x in candidates[vtid]]), fg="blue"))
         elif (trace.event.name in target_chain) and (vtid in candidates):
-            if len(candidates[vtid]) >= endorder and (trace.event.name in target_chain[endorder:]):
-                trace_index = target_chain[endorder:].index(trace.event.name) + endorder
-                expected_index = target_chain[endorder:].index(candidates[vtid][-1].event.name) + 1 + endorder
-            elif len(candidates[vtid]) >= endorder:
-                # print(color("Skipping: " + str(trace.event.name), fg="yellow"))
+            # account for cycles over endorder (e.g. after having gone a few times over ros2:callback_end)
+            seeked_index = len(candidates[vtid]) - 1
+            loops = seeked_index//endorder
+            sub_index = seeked_index%endorder
+
+            if len(candidates[vtid]) >= loops*endorder and (trace.event.name in target_chain[loops*endorder:]):
+                # trace_index = target_chain[endorder:].index(trace.event.name) + endorder
+                # expected_index = target_chain[endorder:].index(candidates[vtid][-1].event.name) + 1 + endorder
+                trace_index = target_chain[loops*endorder:].index(trace.event.name) + loops*endorder
+                expected_index = target_chain[loops*endorder:].index(candidates[vtid][-1].event.name) + 1 + loops*endorder
+            elif len(candidates[vtid]) >= loops*endorder:
+                if debug:
+                    print(color("Skipping: " + str(trace.event.name), fg="yellow"))
                 continue  # skip
             else:
                 trace_index = target_chain.index(trace.event.name)
                 expected_index = target_chain.index(candidates[vtid][-1].event.name) + 1
+
+            if debug:                    
+                print(color("Considering: " + str(trace.event.name) + ", expected: " + str(target_chain[expected_index]), fg="white"))
+
             # Account for chains of callbacks
             if trace.event.name == target_chain[-1] and candidates[vtid][-1].event.name == target_chain[0]:
                 if len(candidates[vtid]) > 1:
+                    if debug:
+                        print(color("Chain of callbacks, popping: " + str(candidates[vtid][-1]) + " (found: " + str(trace.event.name) + ")" , fg="yellow"))
                     candidates[vtid] = candidates[vtid][:-1]  # pop last start and continue looking
-                    # print(color("Chain of callbacks, popping: " + str(trace.event.name) , fg="yellow"))
                 else:
                     candidates.pop(vtid)
-                    # print(color("Chain of callbacks while starting, popping: " + str(trace.event.name) , fg="yellow"))
+                    if debug:
+                        print(color("Chain of callbacks while starting, popping: " + str(trace.event.name) , fg="yellow"))
             elif trace_index == expected_index:
                 candidates[vtid].append(trace)
-                # print(color("Found: " + str(trace.event.name), fg="green"))
+                if debug:
+                    print(color("Found: " + str(trace.event.name), fg="green"))
                 if trace.event.name == target_chain[-1] and candidates[vtid][-2].event.name == target_chain[-2] \
                         and len(candidates[vtid]) == len(target_chain):  # last one
                     image_pipeline_msg_sets.append(candidates[vtid])
-                    # print(color("complete set!", fg="pink"))
+                    if debug:
+                        print(color("complete set!", fg="pink"))
                     candidates.pop(vtid)
             else:
                 if trace.event.name == "ros2:rclcpp_publish" or \
                         trace.event.name == "ros2:rcl_publish" or \
                         trace.event.name == "ros2:rmw_publish":
-                    # print(color("Potential chain of publish: " + str(trace.event.name) + ", skipping" , fg="yellow"))
+                    if debug:
+                        print(color("Potential chain of publish: " + str(trace.event.name) + ", skipping" , fg="yellow"))
                     pass
                 else:
                     candidates[vtid].append(trace)
-                    # print(color("Altered order: " + str([x.event.name for x in candidates[vtid]]) + ", discarding", fg="red"))
+                    if debug:
+                        print(color("Altered order: " + str([x.event.name for x in candidates[vtid]]) + ", discarding", fg="red"))
                     candidates.pop(vtid)
         else:
-            # print(color("Skipped: " + str(trace.event.name), fg="grey"))
+            if debug:
+                print(color("Skipped: " + str(trace.event.name), fg="grey"))
             pass
     return image_pipeline_msg_sets
+
 
 def barplot_all(image_pipeline_msg_sets, title="Barplot"):
     global target_chain
@@ -357,8 +355,6 @@ def traces(msg_set):
         target_chain_ns.append(msg_set[msg_index].default_clock_snapshot.ns_from_origin)
     init_ns = target_chain_ns[0]
 
-    print("1")
-
     # draw durations
     ## rclcpp callbacks - rectify
     callback_start = (target_chain_ns[0] - init_ns)/1e6
@@ -374,6 +370,17 @@ def traces(msg_set):
     ## rclcpp callbacks - resize
     callback_start = (target_chain_ns[9] - init_ns)/1e6
     callback_end = (target_chain_ns[17] - init_ns)/1e6
+    duration = callback_end - callback_start
+    add_durations_to_figure(
+        fig,
+        target_chain_layer[0],
+        [(callback_start, callback_start + duration, duration)],
+        'lightgray'
+    )
+
+    ## rclcpp callbacks - harris
+    callback_start = (target_chain_ns[18] - init_ns)/1e6
+    callback_end = (target_chain_ns[26] - init_ns)/1e6
     duration = callback_end - callback_start
     add_durations_to_figure(
         fig,
@@ -425,7 +432,27 @@ def traces(msg_set):
         'seashell'
     )
 
-    print("2")
+    ## harris callback
+    callback_start = (target_chain_ns[19] - init_ns)/1e6
+    callback_end = (target_chain_ns[25] - init_ns)/1e6
+    duration = callback_end - callback_start
+    add_durations_to_figure(
+        fig,
+        target_chain_layer[1],
+        [(callback_start, callback_start + duration, duration)],
+        'whitesmoke'
+    )
+    ## harris op
+    callback_start = (target_chain_ns[20] - init_ns)/1e6
+    callback_end = (target_chain_ns[21] - init_ns)/1e6
+    duration = callback_end - callback_start
+    add_durations_to_figure(
+        fig,
+        target_chain_layer[1],
+        [(callback_start, callback_start + duration, duration)],
+        'seashell'
+    )
+
 
     for msg_index in range(len(msg_set)):
     #     add_markers_to_figure(fig, msg_set[msg_index].event.name, [(target_chain_ns[msg_index] - init_ns)/1e6], 'blue', marker_type='plus', legend_label='timing')
@@ -438,7 +465,6 @@ def traces(msg_set):
             marker_type=target_chain_marker[msg_index],
             # legend_label=msg_set[msg_index].event.name,
             legend_label=target_chain_dissambiguous[msg_index],
-
             size=10,
         )
         if "image_proc_resize_init" in msg_set[msg_index].event.name:
@@ -498,7 +524,6 @@ def traces(msg_set):
                 text=target_chain_dissambiguous[msg_index].split(":")[-1]
             )
         fig.add_layout(label)
-
 
     # hack legend to the right
     fig.legend.location = "right"
@@ -584,7 +609,6 @@ def rms_sets(image_pipeline_msg_sets, indices=None):
     :param: indices, list of indices to consider on each set which will be summed
     for rms. By default, sum of all values on each set.
     """
-
     if indices:
         with_indices_sets = []
         for set in image_pipeline_msg_sets:
@@ -674,6 +698,7 @@ def print_timeline_average(image_pipeline_msg_sets):
         " ({} ms) ".format((image_pipeline_msg_ns_average[-1] - image_pipeline_msg_ns_average[0])/1e6), fg="black", bg="white")
     print(stringout)
 
+
 def statistics(image_pipeline_msg_sets_ms, verbose=False):
     global target_chain_dissambiguous
 
@@ -682,30 +707,15 @@ def statistics(image_pipeline_msg_sets_ms, verbose=False):
     min_ = min_sets(image_pipeline_msg_sets_ms)
     max_ = max_sets(image_pipeline_msg_sets_ms)
 
-    mean_accelerators = mean_sets(image_pipeline_msg_sets_ms,
-        [
+    dataset = [
             target_chain_dissambiguous.index("ros2_image_pipeline:image_proc_rectify_fini"),
             target_chain_dissambiguous.index("ros2_image_pipeline:image_proc_resize_fini"),
-        ]
-    )
-    rms_accelerators = rms_sets(image_pipeline_msg_sets_ms,
-        [
-            target_chain_dissambiguous.index("ros2_image_pipeline:image_proc_rectify_fini"),
-            target_chain_dissambiguous.index("ros2_image_pipeline:image_proc_resize_fini"),
-        ]
-    )
-    max_accelerators = max_sets(image_pipeline_msg_sets_ms,
-        [
-            target_chain_dissambiguous.index("ros2_image_pipeline:image_proc_rectify_fini"),
-            target_chain_dissambiguous.index("ros2_image_pipeline:image_proc_resize_fini"),
-        ]
-    )
-    min_accelerators = min_sets(image_pipeline_msg_sets_ms,
-        [
-            target_chain_dissambiguous.index("ros2_image_pipeline:image_proc_rectify_fini"),
-            target_chain_dissambiguous.index("ros2_image_pipeline:image_proc_resize_fini"),
-        ]
-    )
+            target_chain_dissambiguous.index("ros2_image_pipeline:image_proc_harris_fini")]
+
+    mean_accelerators = mean_sets(image_pipeline_msg_sets_ms, dataset)
+    rms_accelerators = rms_sets(image_pipeline_msg_sets_ms, dataset)
+    max_accelerators = max_sets(image_pipeline_msg_sets_ms, dataset)
+    min_accelerators = min_sets(image_pipeline_msg_sets_ms, dataset)
 
     if verbose:
         print(color("mean: " + str(mean_), fg="yellow"))
@@ -756,10 +766,10 @@ def table(list_sets, list_sets_names):
                 if type(row[element_index]) != str:
                     if row[element_index] > baseline[element_index]:
                         row_str += "**{:.2f}** ms".format(row[element_index]) + " (:small_red_triangle_down: `" \
-                                + "{:.2f}".format(get_change(row[element_index], baseline[element_index])) + "`%) | "
+                                + "{:.2f}".format(get_change(row[element_index], baseline[element_index])) + "x`) | "
                     else:
                         row_str += "**{:.2f}** ms".format(row[element_index]) + " (`" \
-                                + "{:.2f}".format(get_change(row[element_index], baseline[element_index])) + "`%) | "
+                                + "{:.2f}".format(get_change(row[element_index], baseline[element_index])) + "x`) | "
                 else:
                     row_str += row[element_index] + " | "
 
@@ -768,10 +778,10 @@ def table(list_sets, list_sets_names):
                 if type(row[element_index]) != str:
                     if row[element_index] > baseline[element_index]:
                         row_str += "{:.2f} ms".format(row[element_index]) + " (:small_red_triangle_down: `" \
-                                + "{:.2f}".format(get_change(row[element_index], baseline[element_index])) + "`%) | "
+                                + "{:.2f}".format(get_change(row[element_index], baseline[element_index])) + "x`) | "
                     else:
                         row_str += "{:.2f} ms".format(row[element_index]) + " (`" \
-                                + "{:.2f}".format(get_change(row[element_index], baseline[element_index])) + "`%) | "
+                                + "{:.2f}".format(get_change(row[element_index], baseline[element_index])) + "x`) | "
                 else:
                     row_str += row[element_index] + " | "
         count += 1
@@ -819,6 +829,15 @@ target_chain = [
     "ros2:rmw_publish",
     "ros2_image_pipeline:image_proc_resize_cb_fini",
     "ros2:callback_end",
+    "ros2:callback_start",
+    "ros2_image_pipeline:image_proc_harris_cb_init",
+    "ros2_image_pipeline:image_proc_harris_init",
+    "ros2_image_pipeline:image_proc_harris_fini",
+    "ros2:rclcpp_publish",
+    "ros2:rcl_publish",
+    "ros2:rmw_publish",
+    "ros2_image_pipeline:image_proc_harris_cb_fini",
+    "ros2:callback_end",
 ]
 target_chain_dissambiguous = [
     "ros2:callback_start",
@@ -839,6 +858,15 @@ target_chain_dissambiguous = [
     "ros2:rmw_publish (2)",
     "ros2_image_pipeline:image_proc_resize_cb_fini",
     "ros2:callback_end (2)",
+    "ros2:callback_start (3)",
+    "ros2_image_pipeline:image_proc_harris_cb_init",
+    "ros2_image_pipeline:image_proc_harris_init",
+    "ros2_image_pipeline:image_proc_harris_fini",
+    "ros2:rclcpp_publish (3)",
+    "ros2:rcl_publish (3)",
+    "ros2:rmw_publish (3)",
+    "ros2_image_pipeline:image_proc_harris_cb_fini",
+    "ros2:callback_end (3)",    
 ]
 target_chain_colors_fg = [
     "blue",
@@ -859,36 +887,17 @@ target_chain_colors_fg = [
     "blue",
     "yellow",
     "blue",
+    "blue",
+    "yellow",
+    "red",
+    "red",
+    "blue",
+    "blue",
+    "blue",
+    "yellow",
+    "blue",
 ]
-# target_chain_colors_fg_bokeh = [
-#     "lightgray",
-#     "silver",
-#     "darkgray",
-#     "gray",
-#     "dimgray",
-#     "lightslategray",
-#     "slategray",
-#     "darkslategray",
-#     "black",
-#     "burlywood",
-#     "tan",
-#     "rosybrown",
-#     "sandybrown",
-#     "goldenrod",
-#     "darkgoldenrod",
-#     "peru",
-#     "chocolate",
-#     "saddlebrown",
-#     # "blue",
-#     # "blueviolet",
-#     # "brown",
-#     # "burlywood",
-#     # "cadetblue",
-#     # "chartreuse",
-#     # "chocolate",
-#     # "coral",
-#     # "cornflowerblue",
-# ]
+
 target_chain_colors_fg_bokeh = [
     "lightsalmon",
     "salmon",
@@ -908,6 +917,15 @@ target_chain_colors_fg_bokeh = [
     "darkmagenta",
     "indigo",
     "mediumslateblue",
+    "lightsalmon",
+    "salmon",
+    "darksalmon",
+    "lightcoral",
+    "indianred",
+    "crimson",
+    "firebrick",
+    "darkred",
+    "red",
 ]
 target_chain_layer = [
     "rclcpp",
@@ -928,6 +946,15 @@ target_chain_layer = [
     "rmw",
     "userland",
     "rclcpp",
+    "rclcpp",
+    "userland",
+    "userland",
+    "userland",
+    "rclcpp",
+    "rcl",
+    "rmw",
+    "userland",
+    "rclcpp",    
 ]
 target_chain_label_layer = [  # associated with the layer
     3,
@@ -948,6 +975,15 @@ target_chain_label_layer = [  # associated with the layer
     1,
     4,
     3,
+    3,
+    4,
+    4,
+    4,
+    3,
+    2,
+    1,
+    4,
+    3,    
 ]
 target_chain_marker = [
     "diamond",
@@ -968,6 +1004,15 @@ target_chain_marker = [
     "plus",
     "plus",
     "diamond",
+    "diamond",
+    "plus",
+    "plus",
+    "plus",
+    "plus",
+    "plus",
+    "plus",
+    "plus",
+    "diamond",    
 ]
 # For some reason it seems to be displayed in the reverse order on the Y axis
 segment_types = [
@@ -980,47 +1025,18 @@ segment_types = [
 # # ####################
 # # print timing pipeline
 # # ####################
-# # image_pipeline_msg_sets = msgsets_from_trace_concurrent(str(os.environ["HOME"]) + "/.ros/tracing/trace_rectify_resize_fpga")
-# # # print(len(image_pipeline_msg_sets))
-# # # print_timeline(image_pipeline_msg_sets)  # all timelines
-# # print_timeline([image_pipeline_msg_sets[-1]])  # timeline of last message
-# # # print_timeline_average(image_pipeline_msg_sets)  # timeline of averages, NOTE only totals are of interest
+# image_pipeline_msg_sets = msgsets_from_trace_concurrent(str(os.environ["HOME"]) + "/.ros/tracing/trace_perception_3nodes_cpu")
+# # print(len(image_pipeline_msg_sets))  # how many sets fetched
 
-# target_chain = [
-#     "ros2:callback_start",
-#     "ros2_image_pipeline:image_proc_rectify_cb_init",
-#     "ros2_image_pipeline:image_proc_rectify_init",
-#     "ros2_image_pipeline:image_proc_rectify_fini",
-#     "ros2:rclcpp_publish",
-#     "ros2:rcl_publish",
-#     "ros2:rmw_publish",
-#     "ros2_image_pipeline:image_proc_rectify_cb_fini",
-#     "ros2:callback_end",
-# ]
-# target_chain_colors_fg = [
-#     "blue",
-#     "yellow",
-#     "red",
-#     "red",
-#     "blue",
-#     "blue",
-#     "blue",
-#     "yellow",
-#     "blue",
-# ]
-# # image_pipeline_msg_sets = msgsets_from_trace_concurrent(str(os.environ["HOME"]) + "/.ros/tracing/trace_rectify_resize_fpga_integrated")
-# image_pipeline_msg_sets = msgsets_from_trace_concurrent(str(os.environ["HOME"]) + "/.ros/tracing/trace_rectify_resize_fpga_integrated_250_node")
-# # print(len(image_pipeline_msg_sets))
 # # print_timeline(image_pipeline_msg_sets)  # all timelines
-# # print_timeline([image_pipeline_msg_sets[-1]])  # timeline of last message
-# print_timeline(image_pipeline_msg_sets[-10:])  # timeline of last 10 messages
+# print_timeline([image_pipeline_msg_sets[-1]])  # timeline of last message
+# # print_timeline(image_pipeline_msg_sets[-10:])  # timeline of last 10 messages
 # # print_timeline_average(image_pipeline_msg_sets)  # timeline of averages, NOTE only totals are of interest
 
-
-######################
-# draw tracepoints
-######################
-# image_pipeline_msg_sets = msgsets_from_trace_concurrent(str(os.environ["HOME"]) + "/.ros/tracing/trace_rectify_resize")
+# #####################
+# # draw tracepoints
+# #####################
+# image_pipeline_msg_sets = msgsets_from_trace_concurrent(str(os.environ["HOME"]) + "/.ros/tracing/trace_perception_3nodes_cpu")
 # msg_set = image_pipeline_msg_sets[-1]
 # traces(msg_set)
 
@@ -1030,71 +1046,6 @@ segment_types = [
 # # # NOTE: Discard first few
 # image_pipeline_msg_sets = msgsets_from_trace_concurrent(str(os.environ["HOME"]) + "/.ros/tracing/trace_rectify_resize")
 # barplot_all(image_pipeline_msg_sets[10:], title="image_pipeline in CPU")
-# image_pipeline_msg_sets = msgsets_from_trace_concurrent(str(os.environ["HOME"]) + "/.ros/tracing/trace_rectify_resize_fpga")
-# barplot_all(image_pipeline_msg_sets[10:], title="image_pipeline in FPGA")
-
-# # image_pipeline_msg_sets = msgsets_from_trace_concurrent(str(os.environ["HOME"]) + "/.ros/tracing/trace_rectify_resize_stress")
-# # barplot_all(image_pipeline_msg_sets[10:], title="image_pipeline in CPU and with stress")
-# # image_pipeline_msg_sets = msgsets_from_trace_concurrent(str(os.environ["HOME"]) + "/.ros/tracing/trace_rectify_resize_fpga_stress")
-# # barplot_all(image_pipeline_msg_sets[10:], title="image_pipeline in FPGA and with stress")
-
-
-# target_chain = [
-#     "ros2:callback_start",
-#     "ros2_image_pipeline:image_proc_rectify_cb_init",
-#     "ros2_image_pipeline:image_proc_rectify_init",
-#     "ros2_image_pipeline:image_proc_rectify_fini",
-#     "ros2:rclcpp_publish",
-#     "ros2:rcl_publish",
-#     "ros2:rmw_publish",
-#     "ros2_image_pipeline:image_proc_rectify_cb_fini",
-#     "ros2:callback_end",
-#     # "ros2:callback_start",
-#     # "ros2_image_pipeline:image_proc_resize_cb_init",
-#     # "ros2_image_pipeline:image_proc_resize_init",
-#     # "ros2_image_pipeline:image_proc_resize_fini",
-#     # "ros2:rclcpp_publish",
-#     # "ros2:rcl_publish",
-#     # "ros2:rmw_publish",
-#     # "ros2_image_pipeline:image_proc_resize_cb_fini",
-#     # "ros2:callback_end",
-# ]
-# target_chain_dissambiguous = target_chain
-# target_chain_colors_fg = [
-#     "blue",
-#     "yellow",
-#     "red",
-#     "red",
-#     "blue",
-#     "blue",
-#     "blue",
-#     "yellow",
-#     "blue",
-#     # "blue",
-#     # "yellow",
-#     # "red",
-#     # "red",
-#     # "blue",
-#     # "blue",
-#     # "blue",
-#     # "yellow",
-#     # "blue",
-# ]
-
-# image_pipeline_msg_sets = msgsets_from_trace_concurrent(str(os.environ["HOME"]) + "/.ros/tracing/trace_rectify_resize_fpga_integrated")
-# barplot_all(image_pipeline_msg_sets[10:], title="image_pipeline integrated @ 250 MHz in FPGA")
-
-# target_chain = [
-#     "ros2:callback_start", "ros2_image_pipeline:image_proc_resize_cb_init",
-#     "ros2_image_pipeline:image_proc_resize_init", "ros2_image_pipeline:image_proc_resize_fini",
-#     "ros2:rclcpp_publish", "ros2:rcl_publish", "ros2:rmw_publish",
-#     "ros2_image_pipeline:image_proc_resize_cb_fini", "ros2:callback_end",
-# ]
-# target_chain_dissambiguous = target_chain
-# image_pipeline_msg_sets = msgsets_from_trace_concurrent(str(os.environ["HOME"]) + "/.ros/tracing/trace_test2")
-# barplot_all(image_pipeline_msg_sets[10:], title="image_pipeline, streams @ 250 MHz in FPGA")
-
-
 
 
 # ######################
@@ -1109,234 +1060,60 @@ segment_types = [
 discard_count = 10
 
 image_pipeline_msg_sets_ms_cpu = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-    + "/.ros/tracing/trace_rectify_resize")[discard_count:])
-image_pipeline_msg_sets_ms_fpga = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-    + "/.ros/tracing/trace_rectify_resize_fpga")[discard_count:])
-image_pipeline_msg_sets_ms_fpga_fastdds = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-    + "/.ros/tracing/trace_rectify_resize_fpga_fastdds")[discard_count:])
-image_pipeline_msg_sets_ms_fpga_cyclonedds = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-    + "/.ros/tracing/trace_rectify_resize_fpga_cyclonedds")[discard_count:])
+    + "/.ros/tracing/trace_perception_3nodes_cpu")[discard_count:])
 
-
-# special chain for GPU in Foxy (note there're no publish tracepoints)
 target_chain = [
     "ros2:callback_start",
     "ros2_image_pipeline:image_proc_rectify_cb_init",
     "ros2_image_pipeline:image_proc_rectify_init",
     "ros2_image_pipeline:image_proc_rectify_fini",
+    "ros2:rclcpp_publish",
+    "ros2:rcl_publish",
+    "ros2:rmw_publish",
     "ros2_image_pipeline:image_proc_rectify_cb_fini",
     "ros2:callback_end",
     "ros2:callback_start",
     "ros2_image_pipeline:image_proc_resize_cb_init",
     "ros2_image_pipeline:image_proc_resize_init",
     "ros2_image_pipeline:image_proc_resize_fini",
+    "ros2:rclcpp_publish",
+    "ros2:rcl_publish",
+    "ros2:rmw_publish",
     "ros2_image_pipeline:image_proc_resize_cb_fini",
     "ros2:callback_end",
 ]
-# image_pipeline_msg_sets_ms_cpu_jetson = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-# + "/.ros/tracing/trace_rectify_resize_jetson")[discard_count:])
-image_pipeline_msg_sets_ms_gpu = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-+ "/.ros/tracing/trace_rectify_resize_gpu", endorder=6)[discard_count:])
-for i_set in range(len(image_pipeline_msg_sets_ms_gpu)):
-    # image_pipeline_msg_sets_ms_gpu[i_set] += [0, 0, 0, 0, 0, 0]
-    image_pipeline_msg_sets_ms_gpu[i_set] = [
-        image_pipeline_msg_sets_ms_gpu[i_set][0],
-        image_pipeline_msg_sets_ms_gpu[i_set][1],
-        image_pipeline_msg_sets_ms_gpu[i_set][2],
-        image_pipeline_msg_sets_ms_gpu[i_set][3],
-        image_pipeline_msg_sets_ms_gpu[i_set][4],
-        0, 0, 0,
-        image_pipeline_msg_sets_ms_gpu[i_set][5],
-        image_pipeline_msg_sets_ms_gpu[i_set][6],
-        image_pipeline_msg_sets_ms_gpu[i_set][7],
-        image_pipeline_msg_sets_ms_gpu[i_set][8],
-        image_pipeline_msg_sets_ms_gpu[i_set][9],
-        image_pipeline_msg_sets_ms_gpu[i_set][10],
-        0, 0, 0,
-        image_pipeline_msg_sets_ms_gpu[i_set][11],
-    ]
 
-image_pipeline_msg_sets_ms_gpu_agx = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-+ "/.ros/tracing/trace_rectify_resize_gpu_agx", endorder=6)[discard_count:])
-for i_set in range(len(image_pipeline_msg_sets_ms_gpu_agx)):
-    # image_pipeline_msg_sets_ms_gpu_agx[i_set] += [0, 0, 0, 0, 0, 0]
-    image_pipeline_msg_sets_ms_gpu_agx[i_set] = [
-        image_pipeline_msg_sets_ms_gpu_agx[i_set][0],
-        image_pipeline_msg_sets_ms_gpu_agx[i_set][1],
-        image_pipeline_msg_sets_ms_gpu_agx[i_set][2],
-        image_pipeline_msg_sets_ms_gpu_agx[i_set][3],
-        image_pipeline_msg_sets_ms_gpu_agx[i_set][4],
-        0, 0, 0,
-        image_pipeline_msg_sets_ms_gpu_agx[i_set][5],
-        image_pipeline_msg_sets_ms_gpu_agx[i_set][6],
-        image_pipeline_msg_sets_ms_gpu_agx[i_set][7],
-        image_pipeline_msg_sets_ms_gpu_agx[i_set][8],
-        image_pipeline_msg_sets_ms_gpu_agx[i_set][9],
-        image_pipeline_msg_sets_ms_gpu_agx[i_set][10],
-        0, 0, 0,
-        image_pipeline_msg_sets_ms_gpu_agx[i_set][11],
-    ]
-
-image_pipeline_msg_sets_ms_gpu_agx_cpu = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-+ "/.ros/tracing/trace_rectify_resize_gpu_agx_cpu", endorder=6)[discard_count:])
-for i_set in range(len(image_pipeline_msg_sets_ms_gpu_agx_cpu)):
-    # image_pipeline_msg_sets_ms_gpu_agx_cpu[i_set] += [0, 0, 0, 0, 0, 0]
-    image_pipeline_msg_sets_ms_gpu_agx_cpu[i_set] = [
-        image_pipeline_msg_sets_ms_gpu_agx_cpu[i_set][0],
-        image_pipeline_msg_sets_ms_gpu_agx_cpu[i_set][1],
-        image_pipeline_msg_sets_ms_gpu_agx_cpu[i_set][2],
-        image_pipeline_msg_sets_ms_gpu_agx_cpu[i_set][3],
-        image_pipeline_msg_sets_ms_gpu_agx_cpu[i_set][4],
-        0, 0, 0,
-        image_pipeline_msg_sets_ms_gpu_agx_cpu[i_set][5],
-        image_pipeline_msg_sets_ms_gpu_agx_cpu[i_set][6],
-        image_pipeline_msg_sets_ms_gpu_agx_cpu[i_set][7],
-        image_pipeline_msg_sets_ms_gpu_agx_cpu[i_set][8],
-        image_pipeline_msg_sets_ms_gpu_agx_cpu[i_set][9],
-        image_pipeline_msg_sets_ms_gpu_agx_cpu[i_set][10],
-        0, 0, 0,
-        image_pipeline_msg_sets_ms_gpu_agx_cpu[i_set][11],
-    ]
+image_pipeline_msg_sets_ms_cpu2 = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
+    + "/.ros/tracing/trace_rectify_resize")[discard_count:])
+for i_set in range(len(image_pipeline_msg_sets_ms_cpu2)):
+    image_pipeline_msg_sets_ms_cpu2[i_set] = image_pipeline_msg_sets_ms_cpu2[i_set] + 9*[0]
 
 
-# # image_pipeline_msg_sets_ms_fpga_streamlined = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-# #     + "/.ros/tracing/trace_rectify_resize_fpga_streamlined")[discard_count:])
-# # image_pipeline_msg_sets_ms_fpga_streamlined_xrt = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-# #     + "/.ros/tracing/trace_rectify_resize_fpga_streamlined_xrt")[discard_count:])
-# image_pipeline_msg_sets_ms_cpu_stress = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-#     + "/.ros/tracing/trace_rectify_resize_stress")[discard_count:])
-# image_pipeline_msg_sets_ms_fpga_stress = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-#     + "/.ros/tracing/trace_rectify_resize_fpga_stress")[discard_count:])
-
+# streamlined 200 MHz
 target_chain = [
-    "ros2:callback_start", "ros2_image_pipeline:image_proc_rectify_cb_init",
-    "ros2_image_pipeline:image_proc_rectify_init", "ros2_image_pipeline:image_proc_rectify_fini",
+    "ros2:callback_start", "ros2_image_pipeline:image_proc_harris_cb_init",
+    "ros2_image_pipeline:image_proc_harris_init", "ros2_image_pipeline:image_proc_harris_fini",
     "ros2:rclcpp_publish", "ros2:rcl_publish", "ros2:rmw_publish",
-    "ros2_image_pipeline:image_proc_rectify_cb_fini", "ros2:callback_end",
+    "ros2_image_pipeline:image_proc_harris_cb_fini", "ros2:callback_end",
 ]
-image_pipeline_msg_sets_ms_fpga_integrated = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-    + "/.ros/tracing/trace_rectify_resize_fpga_integrated")[discard_count:])
+image_pipeline_msg_sets_ms_fpga_streamlined_200 = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
+    + "/.ros/tracing/trace_perception_3nodes_fpga_200")[discard_count:])
 # fix data of "*_integrated" to align with dimensions of the rest
-for i_set in range(len(image_pipeline_msg_sets_ms_fpga_integrated)):
-    image_pipeline_msg_sets_ms_fpga_integrated[i_set] += [0, 0, 0, 0, 0, 0, 0, 0, 0]
+for i_set in range(len(image_pipeline_msg_sets_ms_fpga_streamlined_200)):
+    image_pipeline_msg_sets_ms_fpga_streamlined_200[i_set] = 18*[0] + image_pipeline_msg_sets_ms_fpga_streamlined_200[i_set]
 
-# image_pipeline_msg_sets_ms_fpga_integrated_xrt = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-#     + "/.ros/tracing/trace_rectify_resize_fpga_integrated_xrt")[discard_count:])
-# # fix data of "*_integrated" to align with dimensions of the rest
-# for i_set in range(len(image_pipeline_msg_sets_ms_fpga_integrated_xrt)):
-#     image_pipeline_msg_sets_ms_fpga_integrated_xrt[i_set] += [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-# image_pipeline_msg_sets_ms_fpga_integrated_streamlined = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-#     + "/.ros/tracing/trace_rectify_resize_fpga_integrated_streamlined")[discard_count:])
-# # fix data of "*_integrated" to align with dimensions of the rest
-# for i_set in range(len(image_pipeline_msg_sets_ms_fpga_integrated_streamlined)):
-#     image_pipeline_msg_sets_ms_fpga_integrated_streamlined[i_set] += [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-# image_pipeline_msg_sets_ms_fpga_integrated_streamlined_xrt = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-#     + "/.ros/tracing/trace_rectify_resize_fpga_integrated_streamlined_xrt")[discard_count:])
-# # fix data of "*_integrated" to align with dimensions of the rest
-# for i_set in range(len(image_pipeline_msg_sets_ms_fpga_integrated_streamlined_xrt)):
-#     image_pipeline_msg_sets_ms_fpga_integrated_streamlined_xrt[i_set] += [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-# # stress
-# image_pipeline_msg_sets_ms_fpga_integrated_stress = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-#     + "/.ros/tracing/trace_rectify_resize_fpga_integrated_stress")[discard_count:])
-# # fix data of "*_integrated" to align with dimensions of the rest
-# for i_set in range(len(image_pipeline_msg_sets_ms_fpga_integrated_stress)):
-#     image_pipeline_msg_sets_ms_fpga_integrated_stress[i_set] += [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-# image_pipeline_msg_sets_ms_fpga_integrated_xrt_stress = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-#     + "/.ros/tracing/trace_rectify_resize_fpga_integrated_xrt_stress")[discard_count:])
-# # fix data of "*_integrated" to align with dimensions of the rest
-# for i_set in range(len(image_pipeline_msg_sets_ms_fpga_integrated_xrt_stress)):
-#     image_pipeline_msg_sets_ms_fpga_integrated_xrt_stress[i_set] += [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-# # image_pipeline_msg_sets_ms_fpga_integrated_streamlined_stress = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-# #     + "/.ros/tracing/trace_rectify_resize_fpga_integrated_streamlined_stress")[discard_count:])
-# # # fix data of "*_integrated" to align with dimensions of the rest
-# # for i_set in range(len(image_pipeline_msg_sets_ms_fpga_integrated_streamlined_stress)):
-# #     image_pipeline_msg_sets_ms_fpga_integrated_streamlined_stress[i_set] += [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-# image_pipeline_msg_sets_ms_fpga_integrated_streamlined_xrt_stress = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-#     + "/.ros/tracing/trace_rectify_resize_fpga_integrated_streamlined_xrt_stress")[discard_count:])
-# # fix data of "*_integrated" to align with dimensions of the rest
-# for i_set in range(len(image_pipeline_msg_sets_ms_fpga_integrated_streamlined_xrt_stress)):
-#     image_pipeline_msg_sets_ms_fpga_integrated_streamlined_xrt_stress[i_set] += [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-target_chain = [
-    "ros2:callback_start", "ros2_image_pipeline:image_proc_resize_cb_init",
-    "ros2_image_pipeline:image_proc_resize_init", "ros2_image_pipeline:image_proc_resize_fini",
-    "ros2:rclcpp_publish", "ros2:rcl_publish", "ros2:rmw_publish",
-    "ros2_image_pipeline:image_proc_resize_cb_fini", "ros2:callback_end",
-]
-image_pipeline_msg_sets_ms_fpga_streamlined = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-    + "/.ros/tracing/trace_rectify_resize_fpga_streamlined")[discard_count:])
-# fix data of "*_integrated" to align with dimensions of the rest
-for i_set in range(len(image_pipeline_msg_sets_ms_fpga_streamlined)):
-    image_pipeline_msg_sets_ms_fpga_streamlined[i_set] = [0, 0, 0, 0, 0, 0, 0, 0, 0] + image_pipeline_msg_sets_ms_fpga_streamlined[i_set]
-
-# image_pipeline_msg_sets_ms_fpga_streamlined_xrt = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-#     + "/.ros/tracing/trace_rectify_resize_fpga_streamlined_xrt")[discard_count:])
-# # fix data of "*_integrated" to align with dimensions of the rest
-# for i_set in range(len(image_pipeline_msg_sets_ms_fpga_streamlined_xrt)):
-#     image_pipeline_msg_sets_ms_fpga_streamlined_xrt[i_set] = [0, 0, 0, 0, 0, 0, 0, 0, 0] + image_pipeline_msg_sets_ms_fpga_streamlined_xrt[i_set]
-
-
+# # streamlined 100 MHz
 # target_chain = [
-#     "ros2:callback_start", "ros2_image_pipeline:image_proc_rectify_cb_init",
-#     "ros2_image_pipeline:image_proc_rectify_init", "ros2_image_pipeline:image_proc_rectify_fini",    
-#     "ros2_image_pipeline:image_proc_rectify_cb_fini", "ros2:callback_end",
+#     "ros2:callback_start", "ros2_image_pipeline:image_proc_harris_cb_init",
+#     "ros2_image_pipeline:image_proc_harris_init", "ros2_image_pipeline:image_proc_harris_fini",
+#     "ros2:rclcpp_publish", "ros2:rcl_publish", "ros2:rmw_publish",
+#     "ros2_image_pipeline:image_proc_harris_cb_fini", "ros2:callback_end",
 # ]
-
-# image_pipeline_msg_sets_ms_fpga_streamlined_rectify = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-#     + "/.ros/tracing/trace_rectify_resize_fpga_streamlined")[discard_count:])
+# image_pipeline_msg_sets_ms_fpga_streamlined_100 = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
+#     + "/.ros/tracing/trace_perception_3nodes_fpga_100")[discard_count:])
 # # fix data of "*_integrated" to align with dimensions of the rest
-# for i_set in range(len(image_pipeline_msg_sets_ms_fpga_streamlined_rectify)):
-#     image_pipeline_msg_sets_ms_fpga_streamlined_rectify[i_set] = image_pipeline_msg_sets_ms_fpga_streamlined_rectify[i_set] + [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-
-# image_pipeline_msg_sets_ms_fpga_integrated = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-#     + "/.ros/tracing/trace_rectify_resize_fpga_integrated")[discard_count:])
-# # fix data of "*_integrated" to align with dimensions of the rest
-# for i_set in range(len(image_pipeline_msg_sets_ms_fpga_integrated)):
-#     image_pipeline_msg_sets_ms_fpga_integrated[i_set] += [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-# image_pipeline_msg_sets_ms_fpga_integrated_200 = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-#     + "/.ros/tracing/trace_rectify_resize_fpga_integrated_200")[discard_count:])
-# # fix data of "*_integrated" to align with dimensions of the rest
-# for i_set in range(len(image_pipeline_msg_sets_ms_fpga_integrated_200)):
-#     image_pipeline_msg_sets_ms_fpga_integrated_200[i_set] += [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-# image_pipeline_msg_sets_ms_fpga_integrated_250 = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-#     + "/.ros/tracing/trace_rectify_resize_fpga_integrated_250")[discard_count:])
-# # fix data of "*_integrated" to align with dimensions of the rest
-# for i_set in range(len(image_pipeline_msg_sets_ms_fpga_integrated_250)):
-#     image_pipeline_msg_sets_ms_fpga_integrated_250[i_set] += [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-# image_pipeline_msg_sets_ms_fpga_integrated_250_stress = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-#     + "/.ros/tracing/trace_rectify_resize_fpga_integrated_250_stress")[discard_count:])
-# # fix data of "*_integrated" to align with dimensions of the rest
-# for i_set in range(len(image_pipeline_msg_sets_ms_fpga_integrated_250_stress)):
-#     image_pipeline_msg_sets_ms_fpga_integrated_250_stress[i_set] += [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-# image_pipeline_msg_sets_ms_fpga_integrated_250_xrt = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-#     + "/.ros/tracing/trace_rectify_resize_fpga_integrated_250_xrt")[discard_count:])
-# # fix data of "*_integrated" to align with dimensions of the rest
-# for i_set in range(len(image_pipeline_msg_sets_ms_fpga_integrated_250_xrt)):
-#     image_pipeline_msg_sets_ms_fpga_integrated_250_xrt[i_set] += [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-# image_pipeline_msg_sets_ms_fpga_streamlined = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-#     + "/.ros/tracing/trace_rectify_resize_fpga_integrated_streamlined")[discard_count:])
-# # fix data of "*_integrated" to align with dimensions of the rest
-# for i_set in range(len(image_pipeline_msg_sets_ms_fpga_streamlined)):
-#     image_pipeline_msg_sets_ms_fpga_streamlined[i_set] += [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-# image_pipeline_msg_sets_ms_fpga_streamlined_xrt = barchart_data(msgsets_from_trace_concurrent(str(os.environ["HOME"]) \
-#     + "/.ros/tracing/trace_rectify_resize_fpga_integrated_streamlined_xrt")[discard_count:])
-# # fix data of "*_integrated" to align with dimensions of the rest
-# for i_set in range(len(image_pipeline_msg_sets_ms_fpga_streamlined_xrt)):
-#     image_pipeline_msg_sets_ms_fpga_streamlined_xrt[i_set] += [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
+# for i_set in range(len(image_pipeline_msg_sets_ms_fpga_streamlined_100)):
+#     image_pipeline_msg_sets_ms_fpga_streamlined_100[i_set] = 18*[0] + image_pipeline_msg_sets_ms_fpga_streamlined_100[i_set]
 
 #///////////////////
 # Markdown Table results
@@ -1345,174 +1122,44 @@ for i_set in range(len(image_pipeline_msg_sets_ms_fpga_streamlined)):
 table(
     [
         # full pipeline
+        # image_pipeline_msg_sets_ms_cpu2,
         image_pipeline_msg_sets_ms_cpu,
-        image_pipeline_msg_sets_ms_fpga,
-        # image_pipeline_msg_sets_ms_fpga_fastdds,
-        image_pipeline_msg_sets_ms_fpga_cyclonedds,
-        image_pipeline_msg_sets_ms_gpu,
-        image_pipeline_msg_sets_ms_gpu_agx,
-        image_pipeline_msg_sets_ms_gpu_agx_cpu,
-        # # integrated
-        image_pipeline_msg_sets_ms_fpga_integrated,
-        # image_pipeline_msg_sets_ms_fpga_integrated_xrt,
-        # streamlined
-        image_pipeline_msg_sets_ms_fpga_streamlined,
-        # image_pipeline_msg_sets_ms_fpga_streamlined_xrt,
-        # # integrated, streamlined
-        # image_pipeline_msg_sets_ms_fpga_integrated_streamlined,
-        # image_pipeline_msg_sets_ms_fpga_integrated_streamlined_xrt,
-        #
-        # # full pipeline stress
-        # image_pipeline_msg_sets_ms_cpu,
-        # image_pipeline_msg_sets_ms_fpga,
-        # # image_pipeline_msg_sets_ms_fpga_streamlined,
-        # # image_pipeline_msg_sets_ms_fpga_streamlined_xrt,
-        # # integrated stress
-        # image_pipeline_msg_sets_ms_fpga_integrated,
-        # image_pipeline_msg_sets_ms_fpga_integrated_xrt,
-        # # integrated, streamlined stress
-        # # image_pipeline_msg_sets_ms_fpga_integrated_streamlined,
-        # image_pipeline_msg_sets_ms_fpga_integrated_streamlined_xrt,
+        image_pipeline_msg_sets_ms_fpga_streamlined_200,
+        # image_pipeline_msg_sets_ms_fpga_streamlined_100,
     ],
     [
         # full pipeline
-        "CPU **baseline**",
-        "FPGA @ 250 MHz",
-        # "FPGA FastDDS @ 250 MHz",
-        "FPGA CycloneDDS @ 250 MHz",
-        "GPU (Isaac ROS, Jetson Nano) CycloneDDS, Foxy",
-        "GPU (Isaac ROS, Jetson AGX Xavier) CycloneDDS, Foxy",
-        "CPU (Jetson AGX Xavier) CycloneDDS, Foxy",
-        # # integrated
-        "FPGA, integrated @ 250 MHz",
-        # "FPGA, integrated, XRT @ 250 MHz",
-        # streamlined
-        "FPGA, streams (resize) @ 250 MHz",
-        # "FPGA, streams (resize), XRT @ 250 MHz",
-        # # integrated, streamlined
-        # "FPGA, integrated, streams @ 250 MHz",
-        # "FPGA, integrated, streams, XRT @ 250 MHz",
-        #
-        # # full pipeline stress
-        # "CPU **baseline**",
-        # "FPGA @ 250 MHz",
-        # # "FPGA, streams @ 250 MHz",
-        # # "FPGA, streams, XRT @ 250 MHz",
-        # # integrated stress
-        # "FPGA, integrated @ 250 MHz",
-        # "FPGA, integrated, XRT @ 250 MHz",
-        # # integrated, streamlined stress
-        # # "FPGA, integrated, streams @ 250 MHz",
-        # "FPGA, integrated, streams, XRT @ 250 MHz",
+        # "CPU (2 nodes)",
+        "CPU (3 nodes)",
+        "FPGA streamlined @ 200 MHz (3 nodes)",
+        # "FPGA streamlined @ 100 MHz (3 nodes)",
     ]
 )
 
 # #///////////////////
 # # Plot, either averages or latest, etc
 # #///////////////////
-
-# # # plot latest values
-# # df_cpu = pd.DataFrame(image_pipeline_msg_sets_ms_cpu[-1:])  # pick the latest one
-# # df_fpga = pd.DataFrame(image_pipeline_msg_sets_ms_fpga[-1:])  # pick the latest one
-# # df = pd.concat([df_cpu, df_fpga], ignore_index=True)
-# # df.columns = target_chain_dissambiguous
-# # substrates = pd.DataFrame({'substrate': ["CPU","FPGA"]})
-# # df = df.join(substrates)
-
-# # plot averages
 # df_cpu_mean = pd.DataFrame(image_pipeline_msg_sets_ms_cpu).mean()
-# df_fpga_mean = pd.DataFrame(image_pipeline_msg_sets_ms_fpga).mean()
-
-# # df_fpga_mean_fastdds = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_fastdds).mean()
-# df_fpga_mean_cyclonedds = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_cyclonedds).mean()
-# df_cpu_mean_gpu = pd.DataFrame(image_pipeline_msg_sets_ms_gpu).mean()
-# df_cpu_mean_gpu_agx = pd.DataFrame(image_pipeline_msg_sets_ms_gpu_agx).mean()
-# df_cpu_mean_gpu_agx_cpu = pd.DataFrame(image_pipeline_msg_sets_ms_gpu_agx_cpu).mean()
-
-# df_fpga_mean_streamlined = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_streamlined).mean()
-# # df_fpga_mean_streamlined_rectify = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_streamlined_rectify).mean()
-
-# # df_fpga_mean_streamlined_xrt = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_streamlined_xrt).mean()
-# df_fpga_integrated_mean = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated).mean()
-# # df_fpga_integrated_mean_xrt = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_xrt).mean()
-# # df_fpga_integrated_streamlined_mean = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_streamlined).mean()
-# # df_fpga_integrated_streamlined_mean_xrt = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_streamlined_xrt).mean()
-
-
-
-# # df_cpu_mean_stress = pd.DataFrame(image_pipeline_msg_sets_ms_cpu_stress).mean()
-# # df_fpga_mean_stress = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_stress).mean()
-# # # df_fpga_mean_stress_streamlined = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_streamlined_stress).mean()
-# # # df_fpga_mean_stress_streamlined_xrt = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_streamlined_xrt_stress).mean()
-# # df_fpga_integrated_mean_stress = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_stress).mean()
-# # df_fpga_integrated_mean_xrt_stress = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_xrt_stress).mean()
-# # # df_fpga_integrated_streamlined_mean_stress = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_streamlined_stress).mean()
-# # df_fpga_integrated_streamlined_mean_xrt_stress = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_streamlined_xrt_stress).mean()
-
-# # df_cpu_stress_mean = pd.DataFrame(image_pipeline_msg_sets_ms_cpu_stress).mean()
-# # df_fpga_stress_mean = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_stress).mean()
-# # df_fpga_integrated_mean = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated).mean()
-# # df_fpga_integrated_mean_200 = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_200).mean()
-# # df_fpga_integrated_mean_250 = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_250).mean()
-# # df_fpga_integrated_mean_250_stress = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_250_stress).mean()
-# # df_fpga_integrated_mean_250_xrt = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_250_xrt).mean()
-# # df_fpga_mean_streamlined = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_streamlined).mean()
-# # df_fpga_mean_streamlined_xrt = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_streamlined_xrt).mean()
-# # df_fpga_integrated_mean_250_new = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_250_new).mean()
-# # df_fpga_integrated_mean_250_node = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_integrated_250_node).mean()
-
-
-# ############### print values #######################
-# # print(target_chain_dissambiguous)
-# # print("CPU: " + str(list(df_cpu_mean)))
-# # print("FPGA @ 250 MHz: " + str(list(df_fpga_mean)))
-# # print("FPGA, integrated @ 250 MHz: " + str(list(df_fpga_integrated_mean)))
-# # print("FPGA, streams (resize) @ 250 MHz: " + str(list(df_fpga_mean_streamlined)))
-# ###############
-
+# df_cpu_mean2 = pd.DataFrame(image_pipeline_msg_sets_ms_cpu2).mean()
+# df_fpga_mean_streamlined_200 = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_streamlined_200).mean()
+# # df_fpga_mean_streamlined_100 = pd.DataFrame(image_pipeline_msg_sets_ms_fpga_streamlined_100).mean()
 
 # df_mean = pd.concat(
 #     [
 #         # full pipeline
+#         # df_cpu_mean2,
 #         df_cpu_mean,
-#         df_fpga_mean,
-#         # df_fpga_mean_fastdds,
-#         df_fpga_mean_cyclonedds,
-#         df_cpu_mean_gpu,
-#         df_cpu_mean_gpu_agx,
-#         df_cpu_mean_gpu_agx_cpu,
-#         # # integrated
-#         df_fpga_integrated_mean,
-#         # df_fpga_integrated_mean_xrt,
-#         # streamlined
-#         df_fpga_mean_streamlined,
-#         # df_fpga_mean_streamlined_rectify,
-#         # df_fpga_mean_streamlined_xrt,
-#         # # integrated, streamlined
-#         # df_fpga_integrated_streamlined_mean,
-#         # df_fpga_integrated_streamlined_mean_xrt,
+#         df_fpga_mean_streamlined_200,
+#         # df_fpga_mean_streamlined_100,
 #     ], axis=1).transpose()
 # df_mean.columns = target_chain_dissambiguous
 # substrates = pd.DataFrame({'substrate':
 #     [
 #         # full pipeline
-#         "CPU",
-#         "FPGA @ 250 MHz",
-#         # "FPGA FastDDS @ 250 MHz",
-#         "FPGA CycloneDDS @ 250 MHz",
-#         "GPU (Isaac ROS, Jetson Nano) CycloneDDS, Foxy",
-#         "GPU (Isaac ROS, Jetson AGX Xavier) CycloneDDS, Foxy",
-#         "CPU (Jetson AGX Xavier) CycloneDDS, Foxy",
-#         # # integrated
-#         "FPGA, integrated @ 250 MHz",
-#         # "FPGA, integrated, XRT @ 250 MHz",
-#         # streamlined
-#         "FPGA, streams (resize) @ 250 MHz",
-#         # "FPGA, streams (rectify) @ 250 MHz",
-#         # "FPGA, streams (resize), XRT @ 250 MHz",
-#         # # integrated, streamlined
-#         # "FPGA, integrated, streams @ 250 MHz",
-#         # "FPGA, integrated, streams, XRT @ 250 MHz",
+#         # "CPU (2 nodes)",
+#         "CPU (3 nodes)",
+#         "FPGA streamlined @ 200 MHz (3 nodes)",
+#         # "FPGA streamlined @ 100 MHz (3 nodes)",
 #     ]})
 # df_mean = df_mean.join(substrates)
 

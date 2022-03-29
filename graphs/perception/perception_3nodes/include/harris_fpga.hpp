@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef IMAGE_PROC__HARRIS_HPP_
-#define IMAGE_PROC__HARRIS_HPP_
+#ifndef IMAGE_PROC__HARRIS_FPGA_HPP_
+#define IMAGE_PROC__HARRIS_FPGA_HPP_
 
 #include <rclcpp/rclcpp.hpp>
 #include <image_transport/image_transport.hpp>
@@ -27,14 +27,17 @@
 #include <vector>
 #include <thread>
 
-namespace image_proc
+#include <vitis_common/common/ros_opencl_120.hpp>
+#include "opencv2/imgproc.hpp"
+
+namespace perception_3nodes
 {
 
-class HarrisNode
+class HarrisNodeFPGA
   : public rclcpp::Node
 {
 public:
-  explicit HarrisNode(const rclcpp::NodeOptions &);
+  explicit HarrisNodeFPGA(const rclcpp::NodeOptions &);
 
 protected:
   // image_transport::CameraPublisher pub_image_;
@@ -46,13 +49,17 @@ protected:
   int blockSize_harris;
   int apertureSize;
 
+  cl::Kernel* krnl_;
+  cl::Context* context_;
+  cl::CommandQueue* queue_;
+
   std::mutex connect_mutex_;
 
   void imageCb(
     sensor_msgs::msg::Image::ConstSharedPtr image_msg,
     sensor_msgs::msg::CameraInfo::ConstSharedPtr info_msg);
 
-  void harrisImage(
+  void harrisImage_fpga(
     const cv::Mat& in_img,
     cv::Mat& harris_img) const;
 
@@ -61,7 +68,7 @@ protected:
     cv::Mat& harris_img) const;
 };
 
-}  // namespace image_proc
+}  // namespace perception_3nodes
 
-#endif  // IMAGE_PROC__HARRIS_HPP_
+#endif  // IMAGE_PROC__HARRIS_FPGA_HPP_
 

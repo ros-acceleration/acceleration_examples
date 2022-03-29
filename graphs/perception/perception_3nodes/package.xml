@@ -10,7 +10,15 @@
     detection (harris) operations over a raw image dataflow.
     The computational graph is meant to produce an information flow 
     that's useful to find matching points (corners) between images 
-    in the dataflow to extract relevant information from them. 
+    in the dataflow to extract relevant information from them.
+
+    Each one of the computational Nodes uses hardware acceleration to
+    speed up its computations and uses an intra-FPGA ROS 2 node 
+    communication queue to enable faster data flows, amongst them
+    while avoiding the ROS 2 message/passing infrastructure (rclcpp,
+    rcl, rmw). This is implemented by leveraging AXI4-Stream 
+    interfaces and transfers data in a sequential streaming manner 
+    directly between acceleration kernels.
     
     Any postprocessing operations (e.g. motion tracking) to extract 
     information is beyond the scope of this simple graph and might 
@@ -24,12 +32,13 @@
   <buildtool_depend>ament_vitis</buildtool_depend>
   <buildtool_depend>ament_cuda</buildtool_depend>
 
-  <build_depend>acceleration_firmware</build_depend>
   <depend>image_proc</depend>
   <depend>isaac_ros_image_proc</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
   <depend>tracetools_image_pipeline</depend>
+  <depend>vitis_common</depend>
+  <depend>perception_2nodes</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

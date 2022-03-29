@@ -26,6 +26,12 @@
 
 #include "tracetools_image_pipeline/tracetools.h"
 #include "harris.hpp"
+#include "xf_ocv_ref.hpp"
+
+#define FILTER_WIDTH 3
+#define BLOCK_WIDTH 3
+#define NMS_RADIUS 1
+#define MAXCORNERS 1024
 
 namespace image_proc
 {
@@ -44,65 +50,27 @@ HarrisNode::HarrisNode(const rclcpp::NodeOptions & options)
       std::placeholders::_1,
       std::placeholders::_2), "raw");
 
-  myHarris_qualityLevel = this->declare_parameter("myHarris_qualityLevel", 50);
-  max_qualityLevel = this->declare_parameter("max_qualityLevel", 100);
-  blockSize_harris = this->declare_parameter("blockSize_harris", 3);
-  apertureSize = this->declare_parameter("apertureSize", 3);
+  myHarris_qualityLevel =
+    this->declare_parameter<int>("myHarris_qualityLevel", 50);
+  max_qualityLevel = this->declare_parameter<int>("max_qualityLevel", 100);
+  blockSize_harris = this->declare_parameter<int>("blockSize_harris", 3);
+  apertureSize = this->declare_parameter<int>("apertureSize", 3);
 }
 
-void HarrisNode::imageCb(
-  sensor_msgs::msg::Image::ConstSharedPtr image_msg,
-  sensor_msgs::msg::CameraInfo::ConstSharedPtr info_msg)
+void HarrisNode::harrisImage(
+    const cv::Mat& in_img,
+    cv::Mat& harris_img) const
 {
-  TRACEPOINT(
-    image_proc_resize_cb_init,
-    static_cast<const void *>(this),
-    static_cast<const void *>(&(*image_msg)),
-    static_cast<const void *>(&(*info_msg)));
-
-  if (pub_image_.getNumSubscribers() < 1) {
-    TRACEPOINT(
-      image_proc_resize_cb_fini,
-      static_cast<const void *>(this),
-      static_cast<const void *>(&(*image_msg)),
-      static_cast<const void *>(&(*info_msg)));
-    return;
-  }
-
-  cv_bridge::CvImagePtr cv_ptr;
-
-  try {
-    cv_ptr = cv_bridge::toCvCopy(image_msg);
-  } catch (cv_bridge::Exception & e) {
-    TRACEPOINT(
-      image_proc_resize_cb_fini,
-      static_cast<const void *>(this),
-      static_cast<const void *>(&(*image_msg)),
-      static_cast<const void *>(&(*info_msg)));
-    RCLCPP_ERROR(this->get_logger(), "cv_bridge exception: %s", e.what());
-    TRACEPOINT(
-      image_proc_resize_cb_fini,
-      static_cast<const void *>(this),
-      static_cast<const void *>(&(*image_msg)),
-      static_cast<const void *>(&(*info_msg)));
-    return;
-  }
-
-  TRACEPOINT(
-    image_proc_resize_init,
-    static_cast<const void *>(this),
-    static_cast<const void *>(&(*image_msg)),
-    static_cast<const void *>(&(*info_msg)));
-
   cv::Mat img, img_gray, myHarris_dst;
+  double myHarris_minVal, myHarris_maxVal;
   cv::RNG rng(12345);
 
   // gray scale the input image
-  cv_ptr->image.copyTo(img);
-  cv::cvtColor(img, img_gray, cv::COLOR_BGR2GRAY);
+  // cv_ptr->image.copyTo(img);
+  cv::cvtColor(in_img, img_gray, cv::COLOR_BGR2GRAY);
 
   myHarris_dst = cv::Mat::zeros(img_gray.size(), CV_32FC(6));
-  Mc = cv::Mat::zeros(img_gray.size(), CV_32FC1);
+  cv::Mat Mc = cv::Mat::zeros(img_gray.size(), CV_32FC1);
 
   cv::cornerEigenValsAndVecs(
     img_gray,
@@ -122,37 +90,148 @@ void HarrisNode::imageCb(
   cv::minMaxLoc(Mc, &myHarris_minVal, &myHarris_maxVal, 0, 0, cv::Mat());
 
   // this->myHarris_function(img, img_gray);
-  myHarris_copy = img.clone();
+  harris_img = in_img.clone();
 
-  if (myHarris_qualityLevel < 1)
-    myHarris_qualityLevel = 1;
+  int new_harris_quality_level = myHarris_qualityLevel;
+  try {
+    this->get_parameter("myHarris_qualityLevel", new_harris_quality_level);
+  } catch (const rclcpp::exceptions::InvalidParameterTypeException& ex) {
+    RCLCPP_ERROR(
+      this->get_logger(),
+      "Invalid parameter value provided: %s", ex.what());
+  }
+
+  if (new_harris_quality_level < 1)
+    new_harris_quality_level = 1;
 
   for (int j = 0; j < img_gray.rows; j++)
     for (int i = 0; i < img_gray.cols; i++)
       if (Mc.at<float>(j, i) > myHarris_minVal +
             (myHarris_maxVal - myHarris_minVal)
-            * myHarris_qualityLevel/max_qualityLevel)
+            * new_harris_quality_level/max_qualityLevel)
         cv::circle(
-          myHarris_copy,
+          harris_img,
           cv::Point(i, j),
           4,
-          cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255)),
+          cv::Scalar(
+            rng.uniform(0, 255),
+            rng.uniform(0, 255),
+            rng.uniform(0, 255)),
           -1, 8, 0);
+}
+
+void HarrisNode::harrisImage2(
+    const cv::Mat& in_img,
+    cv::Mat& harris_img) const
+{
+  cv::Mat ocv_out_img, img_gray;
+  cv::RNG rng(12345);
+
+  uint16_t Thresh;  // Threshold for HLS
+  float Th;
+  if (FILTER_WIDTH == 3) {
+      Th = 30532960.00;
+      Thresh = 442;
+  } else if (FILTER_WIDTH == 5) {
+      Th = 902753878016.0;
+      Thresh = 3109;
+  } else if (FILTER_WIDTH == 7) {
+      Th = 41151168289701888.000000;
+      Thresh = 566;
+  }
+  
+  // Convert rgb into grayscale
+  cvtColor(in_img, img_gray, CV_BGR2GRAY);
+
+  // hls_out_img.create(in_img.rows, in_img.cols, CV_8U); // create memory for hls output image  // NOLINT
+  ocv_out_img.create(img_gray.rows, img_gray.cols, CV_8U); // create memory for opencv output image  // NOLINT  
+  ocv_ref(img_gray, ocv_out_img, Th);
+  harris_img = in_img.clone();
+
+  /// Drawing a circle around corners
+  for (int j = 1; j < ocv_out_img.rows - 1; j++) {
+      for (int i = 1; i < ocv_out_img.cols - 1; i++) {
+          if ((int) ocv_out_img.at<unsigned char>(j, i)) {
+            cv::circle(
+              harris_img,
+              cv::Point(i, j),
+              4,
+              cv::Scalar(
+                rng.uniform(0, 255),
+                rng.uniform(0, 255),
+                rng.uniform(0, 255)),
+              -1, 8, 0);
+          }
+      }
+  }
+}
+
+void HarrisNode::imageCb(
+  sensor_msgs::msg::Image::ConstSharedPtr image_msg,
+  sensor_msgs::msg::CameraInfo::ConstSharedPtr info_msg)
+{
+  TRACEPOINT(
+    image_proc_harris_cb_init,
+    static_cast<const void *>(this),
+    static_cast<const void *>(&(*image_msg)),
+    static_cast<const void *>(&(*info_msg)));
+
+  if (pub_image_.getNumSubscribers() < 1) {
+    TRACEPOINT(
+      image_proc_harris_cb_fini,
+      static_cast<const void *>(this),
+      static_cast<const void *>(&(*image_msg)),
+      static_cast<const void *>(&(*info_msg)));
+    return;
+  }
+
+  cv_bridge::CvImagePtr cv_ptr;
+
+  try {
+    cv_ptr = cv_bridge::toCvCopy(image_msg);
+  } catch (cv_bridge::Exception & e) {
+    TRACEPOINT(
+      image_proc_harris_cb_fini,
+      static_cast<const void *>(this),
+      static_cast<const void *>(&(*image_msg)),
+      static_cast<const void *>(&(*info_msg)));
+    RCLCPP_ERROR(this->get_logger(), "cv_bridge exception: %s", e.what());
+    TRACEPOINT(
+      image_proc_harris_cb_fini,
+      static_cast<const void *>(this),
+      static_cast<const void *>(&(*image_msg)),
+      static_cast<const void *>(&(*info_msg)));
+    return;
+  }
 
   TRACEPOINT(
-    image_proc_resize_fini,
+    image_proc_harris_init,
+    static_cast<const void *>(this),
+    static_cast<const void *>(&(*image_msg)),
+    static_cast<const void *>(&(*info_msg)));
+
+  cv::Mat in_img, ocv_out_img;
+  cv_ptr->image.copyTo(in_img);
+  // harrisImage(in_img, ocv_out_img);
+  harrisImage2(in_img, ocv_out_img);
+
+  TRACEPOINT(
+    image_proc_harris_fini,
     static_cast<const void *>(this),
     static_cast<const void *>(&(*image_msg)),
     static_cast<const void *>(&(*info_msg)));
 
   // Allocate new rectified image message
-  sensor_msgs::msg::Image::SharedPtr harris_msg =
-    cv_bridge::CvImage(image_msg->header, image_msg->encoding, myHarris_copy).toImageMsg();
+  sensor_msgs::msg::Image::SharedPtr harris_msg = cv_bridge::CvImage(
+      image_msg->header,
+      image_msg->encoding,
+      ocv_out_img).toImageMsg();
+
   pub_image_.publish(harris_msg);
 
 
   TRACEPOINT(
-    image_proc_resize_cb_fini,
+    image_proc_harris_cb_fini,
     static_cast<const void *>(this),
     static_cast<const void *>(&(*image_msg)),
     static_cast<const void *>(&(*info_msg)));

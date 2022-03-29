@@ -14,24 +14,29 @@
 // limitations under the License.
 
 #include <memory>
-#include "image_proc/rectify.hpp"
-#include "image_proc/resize.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "harris_fpga.hpp"
+#include "rectify_fpga.hpp"
+#include "resize_fpga.hpp"
 
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
 
-  rclcpp::executors::SingleThreadedExecutor exec;
-  // rclcpp::executors::MultiThreadedExecutor exec;
+  // rclcpp::executors::SingleThreadedExecutor exec;
+  rclcpp::executors::MultiThreadedExecutor exec;
+
   rclcpp::NodeOptions options;
   auto rectify_node =
-    std::make_shared<image_proc::RectifyNode>(options);
+    std::make_shared<perception_3nodes::RectifyNodeFPGAStreamlined>(options);
   auto resize_node =
-    std::make_shared<image_proc::ResizeNode>(options);
+    std::make_shared<perception_3nodes::ResizeNodeFPGAStreamlined>(options);
+  auto harris_node =
+    std::make_shared<perception_3nodes::HarrisNodeFPGA>(options);
 
   exec.add_node(rectify_node);
   exec.add_node(resize_node);
+  exec.add_node(harris_node);
 
   exec.spin();
   rclcpp::shutdown();

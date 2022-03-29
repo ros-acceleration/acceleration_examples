@@ -1,19 +1,12 @@
-#       ____  ____
-#      /   /\/   /
-#     /___/  \  /   Copyright (c) 2021, Xilinx®.
-#     \   \   \/    Author: Víctor Mayoral Vilches <victorma@xilinx.com>
-#      \   \
-#      /   /
-#     /___/   /\
-#     \   \  /  \
-#      \___\/\___\
-#
+# Copyright 2022 Víctor Mayoral-Vilches
+# All rights reserved.
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#
+
 #     http://www.apache.org/licenses/LICENSE-2.0
-#
+
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,7 +27,7 @@ from tracetools_trace.tools.names import DEFAULT_CONTEXT
 def generate_launch_description():
      # Trace
     trace = Trace(
-        session_name="trace_rectify_resize",
+        session_name="trace_perception_3nodes_cpu",
         events_ust=[
             "ros2_image_pipeline:*",
             # "lttng_ust_cyg_profile*",

@@ -19,7 +19,6 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_vitis</buildtool_depend>
 
-  <depend>acceleration_firmware</depend>
   <depend>tracetools</depend>
   <depend>tracetools_acceleration</depend>
 
