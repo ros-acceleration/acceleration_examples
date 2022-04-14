@@ -34,6 +34,7 @@ set(COMPONENT_AMENT_DEPENDENCIES
   # tracetools_acceleration
 )
 
+if (DEFINED CMAKE_SYSROOT)
 add_library(image_proc_adaptive SHARED src/image_proc_adaptive.cpp)
 target_compile_definitions(image_proc_adaptive PRIVATE "COMPOSITION_BUILDING_DLL")
 target_link_libraries(image_proc_adaptive
@@ -83,4 +84,5 @@ install(
       DESTINATION include/${PROJECT_NAME}
 )
 
+endif()  # CMAKE_SYSROOT
 ament_package()
