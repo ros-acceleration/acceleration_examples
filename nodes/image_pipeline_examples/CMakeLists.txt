@@ -30,6 +30,7 @@ set(CMAKE_CXX_FLAGS "-g -O2 -finstrument-functions")
 add_executable(rectify_node src/rectify_node.cpp)
 ament_target_dependencies(rectify_node rclcpp class_loader vitis_common image_proc)
 
+if (DEFINED CMAKE_SYSROOT)
 add_executable(rectify_resize_fpga_node src/rectify_resize_fpga_node.cpp)
 ament_target_dependencies(rectify_resize_fpga_node rclcpp class_loader vitis_common image_proc)
 target_include_directories(rectify_resize_fpga_node PUBLIC
@@ -65,17 +66,22 @@ target_include_directories(rectify_resize_fpga_integrated_streamlined_node PUBLI
   /home/xilinx/XRT/build/Debug/opt/xilinx/xrt/include  # TODO: replace with ROS 2 header-only library
   /usr/include/xrt  # TODO: replace with ROS 2 header-only library
 )
+endif()  # CMAKE_SYSROOT
 
 # targets
 set (install_targets
-  rectify_node
-  rectify_resize_fpga_node
-  rectify_resize_fpga_integrated_node
-  rectify_resize_fpga_streamlined_node
-  rectify_resize_fpga_integrated_streamlined_node)
+  rectify_node)
+
+if (DEFINED CMAKE_SYSROOT)  
+  set (install_targets ${install_targets} 
+       rectify_resize_fpga_node
+       rectify_resize_fpga_integrated_node
+       rectify_resize_fpga_streamlined_node
+       rectify_resize_fpga_integrated_streamlined_node)
 
 if (DEFINED ROS_XRT)  
   set (install_targets ${install_targets} rectify_resize_fpga_streamlined_node_xrt)
+endif()  
 endif()  
 
 install(
