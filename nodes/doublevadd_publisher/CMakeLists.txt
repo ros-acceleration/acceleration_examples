@@ -47,7 +47,7 @@ set(node_plugins "${node_plugins}composition::DoubleVaddComponent;$<TARGET_FILE:
 
 ## Using type adaptation
 ##  only available in ROS_DISTRO="rolling" for now
-if($ENV{ROS_DISTRO} MATCHES "rolling")
+if(($ENV{ROS_DISTRO} MATCHES "rolling") OR ($ENV{ROS_DISTRO} MATCHES "humble"))
   add_library(doublevadd_component_typeadapter SHARED
   src/doublevadd_component_typeadapter.cpp src/vadd.cpp)
   target_compile_definitions(doublevadd_component_typeadapter
