@@ -35,14 +35,15 @@ if(ROS_ACCELERATION)
     NAME vadd
     FILE src/vadd.cpp
     CONFIG src/kv260.cfg
+    CLOCK 100000000:vadd
     INCLUDE
       include
     TYPE
-      sw_emu
+      # sw_emu
       # hw_emu
-      # hw
-      LINK
-      PACKAGE
+      hw
+    LINK
+    PACKAGE
     )
 endif()
 

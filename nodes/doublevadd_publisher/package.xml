@@ -14,9 +14,9 @@
     same package which offloads the vector operations into an FPGA. See
     "faster_doublevadd_publisher" for an even more optimized version.
   </description>
-  <maintainer email="victorma@xilinx.com">Víctor Mayoral Vilches</maintainer>
+  <maintainer email="victor@accelerationrobotics.com">Víctor Mayoral Vilches</maintainer>
   <license>Apache License 2.0</license>
-  <author email="victorma@xilinx.com">Víctor Mayoral Vilches</author>
+  <author email="victor@accelerationrobotics.com">Víctor Mayoral Vilches</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_vitis</buildtool_depend>
@@ -24,6 +24,7 @@
   <depend>tracetools</depend>
   <depend>tracetools_acceleration</depend>
   <depend>adaptive_component</depend>
+  <depend>vitis_common</depend>
 
   <build_depend>rclcpp</build_depend>
   <build_depend>std_msgs</build_depend>

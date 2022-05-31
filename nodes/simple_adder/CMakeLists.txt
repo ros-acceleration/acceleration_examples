@@ -44,7 +44,7 @@ if(ROS_ACCELERATION)
     NAME simple_adder
     FILE src/adder1.cpp
     CONFIG src/kv260.cfg
-    CLOCK 100000000:vadd_accelerated
+    CLOCK 100000000:simple_adder
     INCLUDE
       include
     TYPE

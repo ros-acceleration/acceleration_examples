@@ -131,6 +131,7 @@ if(ROS_VITIS)
   target_link_libraries(doublevadd_node_adaptive ${OpenCL_LIBRARY})
   ament_target_dependencies(doublevadd_node_adaptive
     rclcpp
+    rclcpp_components
     std_msgs
     tracetools
     tracetools_acceleration
