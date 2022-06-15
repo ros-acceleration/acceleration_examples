@@ -16,20 +16,20 @@ find_package(Threads REQUIRED)
 find_package(vitis_common REQUIRED)
 find_package(ament_vitis)
 
-# accelerated_vadd
-add_executable(accelerated_vadd
-  src/host.cpp
-)
-target_include_directories(accelerated_vadd PUBLIC include)
-target_link_libraries(accelerated_vadd
-  ${OpenCL_LIBRARY}
-  pthread
-)
-ament_target_dependencies(accelerated_vadd
-  vitis_common
-)
+if (ROS_VITIS)
+  # accelerated_vadd
+  add_executable(accelerated_vadd
+    src/host.cpp
+  )
+  target_include_directories(accelerated_vadd PUBLIC include)
+  target_link_libraries(accelerated_vadd
+    ${OpenCL_LIBRARY}
+    pthread
+  )
+  ament_target_dependencies(accelerated_vadd
+    vitis_common
+  )
 
-if(ROS_ACCELERATION)
   # vadd kernel
   vitis_acceleration_kernel(
     NAME vadd
@@ -45,11 +45,12 @@ if(ROS_ACCELERATION)
     LINK
     PACKAGE
     )
-endif()
 
-install(TARGETS
-  accelerated_vadd
-  DESTINATION lib/${PROJECT_NAME}
-)
+  install(TARGETS
+    accelerated_vadd
+    DESTINATION lib/${PROJECT_NAME}
+  )
+endif()  # ROS_VITIS
+
 
 ament_package()
