@@ -16,6 +16,13 @@ find_package(Threads REQUIRED)
 find_package(vitis_common REQUIRED)
 find_package(ament_vitis)
 
+# add_executable(accelerated_vadd_new
+#   src/host_new.cpp)
+# target_include_directories(accelerated_vadd_new PUBLIC include)
+# target_link_libraries(accelerated_vadd_new
+#   ${OpenCL_LIBRARY}
+#   pthread)
+
 if (ROS_VITIS)
   # accelerated_vadd
   add_executable(accelerated_vadd
@@ -48,6 +55,7 @@ if (ROS_VITIS)
 
   install(TARGETS
     accelerated_vadd
+    # accelerated_vadd_new
     DESTINATION lib/${PROJECT_NAME}
   )
 endif()  # ROS_VITIS

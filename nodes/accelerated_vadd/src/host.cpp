@@ -37,12 +37,12 @@ int main(int argc, char** argv)
     std::vector<cl::Device> devices = get_xilinx_devices();
     devices.resize(1);
     cl::Device device = devices[0];
-    cl::Context context(device, NULL, NULL, NULL, &err);
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     char* fileBuf = read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
-    cl::Program program(context, devices, bins, NULL, &err);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err);
-    cl::Kernel krnl_vector_add(program,"vadd", &err);
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err, cl::Kernel krnl_vector_add(program,"vadd", &err));
 
 // ------------------------------------------------------------------------------------
 // Step 2: Create buffers and initialize test values
@@ -66,7 +66,9 @@ int main(int argc, char** argv)
     for(int i = 0 ; i < DATA_SIZE ; i++){
         in1[i] = rand() % DATA_SIZE;
         in2[i] = rand() % DATA_SIZE;
-        out[i] = 0;
+        // out[i] = 0;  // writing into a CL_MEM_WRITE_ONLY
+        //              // buffer from the host-code is ambiguous and leads to the kernel
+        //              // not behaving as expected.
     }
 
 // ------------------------------------------------------------------------------------

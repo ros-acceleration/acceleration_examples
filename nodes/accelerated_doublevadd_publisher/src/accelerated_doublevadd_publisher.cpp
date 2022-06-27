@@ -69,7 +69,7 @@ int main(int argc, char * argv[]) {
   // Step 1: Initialize the OpenCL environment for acceleration
   // ------------------------------------------------------------------------
   cl_int err;
-  std::string binaryFile = (argc != 2) ? "vadd.xclbin" : argv[1];
+  std::string binaryFile = (argc != 2) ? "vadd_accelerated.xclbin" : argv[1];
   unsigned fileBufSize;
   std::vector<cl::Device> devices = get_xilinx_devices();
   devices.resize(1);
@@ -113,7 +113,9 @@ int main(int argc, char * argv[]) {
     for (int i = 0 ; i < DATA_SIZE ; i++) {
         in1[i] = rand() % DATA_SIZE;  // NOLINT
         in2[i] = rand() % DATA_SIZE;  // NOLINT
-        out[i] = 0;
+        // out[i] = 0;  // writing into a CL_MEM_WRITE_ONLY (or a CL_MEM_READ_WRITE)
+        //              // buffer from the host-code is ambiguous and leads to the kernel
+        //              // not behaving as expected.
     }
 
     // Set kernel arguments

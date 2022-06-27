@@ -122,7 +122,9 @@ int main(int argc, char * argv[]) {
     for (int i = 0 ; i < DATA_SIZE ; i++) {
         in1[i] = rand() % DATA_SIZE;  // NOLINT
         in2[i] = rand() % DATA_SIZE;  // NOLINT
-        out[i] = 0;
+        // out[i] = 0;  // writing into a CL_MEM_WRITE_ONLY
+        //              // buffer from the host-code is ambiguous and leads to the kernel
+        //              // not behaving as expected.
     }
 
     TRACEPOINT(vadd_pre, ("iteration: " + std::to_string(publish_count)).c_str());
