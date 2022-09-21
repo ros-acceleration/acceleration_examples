@@ -10,8 +10,8 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic -Wno-unknown-pragmas)
 endif()
 
-find_package(ament_vitis)
-find_package(ament_cuda)  # enable CUDA capabilities, if available
+find_package(ament_vitis QUIET)
+find_package(ament_cuda QUIET)  # enable CUDA capabilities, if available
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
@@ -29,22 +29,20 @@ set(node_plugins "")
 # see https://archive.eclipse.org/tracecompass/doc/stable/org.eclipse.tracecompass.doc.user/LTTng-UST-Analyses.html#Flame_Chart_View
 set(CMAKE_CXX_FLAGS "-g -O2 -finstrument-functions")
 
-
-# harris component
-ament_auto_add_library(harris SHARED
-  src/harris.cpp)
-ament_target_dependencies(harris tracetools_image_pipeline)
-target_include_directories(harris PUBLIC
-  # $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include/vitis_common>
-  $ENV{XILINX_HLS}/common/technology/autopilot
-  $ENV{XILINX_HLS}/include)
-target_compile_definitions(harris
-  PRIVATE "COMPOSITION_BUILDING_DLL"
-)
-rclcpp_components_register_nodes(harris "image_proc::HarrisNode")
-set(node_plugins "${node_plugins}image_proc::HarrisNode;$<TARGET_FILE:harris>\n")
-
 if (DEFINED ROS_VITIS)
+  # harris component, dependency with hls_stream.h Vitis-related header
+  ament_auto_add_library(harris SHARED
+    src/harris.cpp)
+  ament_target_dependencies(harris tracetools_image_pipeline)
+  target_include_directories(harris PUBLIC
+    # $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include/vitis_common>
+    $ENV{XILINX_HLS}/common/technology/autopilot
+    $ENV{XILINX_HLS}/include)
+  target_compile_definitions(harris
+    PRIVATE "COMPOSITION_BUILDING_DLL"
+  )
+  rclcpp_components_register_nodes(harris "image_proc::HarrisNode")
+  set(node_plugins "${node_plugins}image_proc::HarrisNode;$<TARGET_FILE:harris>\n")
 
   # 3nodes_harris_fpga component (with OpenCL)
   ament_auto_add_library(3nodes_harris_fpga SHARED src/harris_fpga.cpp)
@@ -135,22 +133,20 @@ if (DEFINED ROS_VITIS)
   target_link_libraries(perception_3nodes_fpga 3nodes_harris_fpga 3nodes_resize_fpga 3nodes_rectify_fpga)
   ament_target_dependencies(perception_3nodes_fpga rclcpp class_loader)
 
-endif()  # ROS_VITIS
+  # Node built with a "component"
+  add_executable(perception_3nodes src/perception_3nodes.cpp)
+  target_link_libraries(perception_3nodes harris)
+  ament_target_dependencies(perception_3nodes rclcpp class_loader image_proc)
 
-# Node built with a "components"
-add_executable(perception_3nodes src/perception_3nodes.cpp)
-target_link_libraries(perception_3nodes harris)
-ament_target_dependencies(perception_3nodes rclcpp class_loader image_proc)
-
-# install targets
-set (install_targets
-  perception_3nodes
-)
-if (DEFINED ROS_VITIS)
+  # install targets
+  set (install_targets
+    perception_3nodes
+  )
   set (install_targets ${install_targets} 
     perception_3nodes_fpga 
   )
 endif()  # ROS_VITIS
+
 install(
   TARGETS ${install_targets}
   DESTINATION lib/${PROJECT_NAME}

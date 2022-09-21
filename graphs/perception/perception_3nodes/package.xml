@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
   <name>perception_3nodes</name>
-  <version>0.3.0</version>
+  <version>0.3.1</version>
   <description>
     Builds on top of the perception_2nodes package providing
     a simple perception computational graph composed by 3 Nodes
