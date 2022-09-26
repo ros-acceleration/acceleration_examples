@@ -19,8 +19,11 @@
   <depend>tracetools_acceleration</depend> -->
   <depend>adaptive_component</depend>
   <depend>rclcpp</depend>
-  <depend>acceleration_firmware_kv260</depend>
   <depend>image_proc</depend>
+  <depend>opencl-headers</depend>
+  <depend>ocl-icd-dev</depend>
+  <depend>ocl-icd-libopencl1</depend>
+  <depend>ocl-icd-opencl-dev</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

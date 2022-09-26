@@ -57,49 +57,49 @@ if(($ENV{ROS_DISTRO} MATCHES "rolling") OR ($ENV{ROS_DISTRO} MATCHES "humble"))
   set(node_plugins "${node_plugins}composition::DoubleVaddTypeAdapter;$<TARGET_FILE:doublevadd_component_typeadapter>\n")
 endif()
 
-if(ROS_VITIS)
-  ## FPGA component
-  find_package(OpenCL REQUIRED)
-  find_package(vitis_common REQUIRED)
+# if(ROS_VITIS)
+## FPGA component
+find_package(OpenCL REQUIRED)
+find_package(vitis_common REQUIRED)
 
-  add_library(doublevadd_component_fpga SHARED src/doublevadd_component_fpga.cpp)
-  target_compile_definitions(doublevadd_component_fpga PRIVATE "COMPOSITION_BUILDING_DLL")
-  target_link_libraries(doublevadd_component_fpga
-    ${OpenCL_LIBRARY}
-  )
-  ament_target_dependencies(doublevadd_component_fpga
-    vitis_common
-    ${COMPONENT_AMENT_DEPENDENCIES}
-  )
-  rclcpp_components_register_nodes(doublevadd_component_fpga "composition::DoubleVaddComponentFPGA")
-  set(node_plugins "${node_plugins}composition::DoubleVaddComponentFPGA;$<TARGET_FILE:doublevadd_component_fpga>\n")
+add_library(doublevadd_component_fpga SHARED src/doublevadd_component_fpga.cpp)
+target_compile_definitions(doublevadd_component_fpga PRIVATE "COMPOSITION_BUILDING_DLL")
+target_link_libraries(doublevadd_component_fpga
+  ${OpenCL_LIBRARY}
+)
+ament_target_dependencies(doublevadd_component_fpga
+  vitis_common
+  ${COMPONENT_AMENT_DEPENDENCIES}
+)
+rclcpp_components_register_nodes(doublevadd_component_fpga "composition::DoubleVaddComponentFPGA")
+set(node_plugins "${node_plugins}composition::DoubleVaddComponentFPGA;$<TARGET_FILE:doublevadd_component_fpga>\n")
 
-  ## An Adaptive Component using an adaptive_component
-  # NOTE: stateless
-  add_library(doublevadd_component_adaptive SHARED src/doublevadd_component_adaptive.cpp)
-  target_compile_definitions(doublevadd_component_adaptive PRIVATE "COMPOSITION_BUILDING_DLL")
-  target_link_libraries(doublevadd_component_adaptive
-    doublevadd_component
-    doublevadd_component_fpga
-    adaptive_component::adaptive_component
-  )
-  ament_target_dependencies(doublevadd_component_adaptive ${COMPONENT_AMENT_DEPENDENCIES})
-  rclcpp_components_register_nodes(doublevadd_component_adaptive "composition::DoubleVaddComponentAdaptive")
-  set(node_plugins "${node_plugins}composition::DoubleVaddComponentAdaptive;$<TARGET_FILE:doublevadd_component_adaptive>\n")
+## An Adaptive Component using an adaptive_component
+# NOTE: stateless
+add_library(doublevadd_component_adaptive SHARED src/doublevadd_component_adaptive.cpp)
+target_compile_definitions(doublevadd_component_adaptive PRIVATE "COMPOSITION_BUILDING_DLL")
+target_link_libraries(doublevadd_component_adaptive
+  doublevadd_component
+  doublevadd_component_fpga
+  adaptive_component::adaptive_component
+)
+ament_target_dependencies(doublevadd_component_adaptive ${COMPONENT_AMENT_DEPENDENCIES})
+rclcpp_components_register_nodes(doublevadd_component_adaptive "composition::DoubleVaddComponentAdaptive")
+set(node_plugins "${node_plugins}composition::DoubleVaddComponentAdaptive;$<TARGET_FILE:doublevadd_component_adaptive>\n")
 
-  ## An Adaptive stateful Component using an adaptive_component
-  # NOTE: stateful
-  add_library(doublevadd_component_adaptive_stateful SHARED src/doublevadd_component_adaptive_stateful.cpp)
-  target_compile_definitions(doublevadd_component_adaptive_stateful PRIVATE "COMPOSITION_BUILDING_DLL")
-  target_link_libraries(doublevadd_component_adaptive_stateful
-    doublevadd_component
-    doublevadd_component_fpga
-    adaptive_component::adaptive_component
-  )
-  ament_target_dependencies(doublevadd_component_adaptive_stateful ${COMPONENT_AMENT_DEPENDENCIES})
-  rclcpp_components_register_nodes(doublevadd_component_adaptive_stateful "composition::DoubleVaddComponentAdaptiveStateful")
-  set(node_plugins "${node_plugins}composition::DoubleVaddComponentAdaptiveStateful;$<TARGET_FILE:doublevadd_component_adaptive_stateful>\n")
-endif()  # ROS_VITIS
+## An Adaptive stateful Component using an adaptive_component
+# NOTE: stateful
+add_library(doublevadd_component_adaptive_stateful SHARED src/doublevadd_component_adaptive_stateful.cpp)
+target_compile_definitions(doublevadd_component_adaptive_stateful PRIVATE "COMPOSITION_BUILDING_DLL")
+target_link_libraries(doublevadd_component_adaptive_stateful
+  doublevadd_component
+  doublevadd_component_fpga
+  adaptive_component::adaptive_component
+)
+ament_target_dependencies(doublevadd_component_adaptive_stateful ${COMPONENT_AMENT_DEPENDENCIES})
+rclcpp_components_register_nodes(doublevadd_component_adaptive_stateful "composition::DoubleVaddComponentAdaptiveStateful")
+set(node_plugins "${node_plugins}composition::DoubleVaddComponentAdaptiveStateful;$<TARGET_FILE:doublevadd_component_adaptive_stateful>\n")
+# endif()  # ROS_VITIS
 
 
 #################
@@ -121,60 +121,59 @@ ament_target_dependencies(doublevadd_node rclcpp class_loader)
 # rosidl_target_interfaces(doublevadd_node
 #       ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
-if(ROS_VITIS)
-  find_package(OpenCL REQUIRED)
-  find_package(vitis_common REQUIRED)
+# if(ROS_VITIS)
+find_package(OpenCL REQUIRED)
+find_package(vitis_common REQUIRED)
 
-  # Adaptive Node integrated
-  add_executable(doublevadd_node_adaptive src/doublevadd_node_adaptive.cpp src/vadd.cpp)
-  target_include_directories(doublevadd_node_adaptive PUBLIC include)
-  target_link_libraries(doublevadd_node_adaptive ${OpenCL_LIBRARY})
-  ament_target_dependencies(doublevadd_node_adaptive
-    rclcpp
-    rclcpp_components
-    std_msgs
-    tracetools
-    tracetools_acceleration
-    class_loader
-    vitis_common)
+# Adaptive Node integrated
+add_executable(doublevadd_node_adaptive src/doublevadd_node_adaptive.cpp src/vadd.cpp)
+target_include_directories(doublevadd_node_adaptive PUBLIC include)
+target_link_libraries(doublevadd_node_adaptive ${OpenCL_LIBRARY})
+ament_target_dependencies(doublevadd_node_adaptive
+  rclcpp
+  rclcpp_components
+  std_msgs
+  tracetools
+  tracetools_acceleration
+  class_loader
+  vitis_common)
 
-    # Adaptive Node using an adaptive_component
-    add_executable(doublevadd_publisher_adaptive src/doublevadd_publisher_adaptive.cpp)
-    target_include_directories(doublevadd_publisher_adaptive PUBLIC include)
-    target_link_libraries(doublevadd_publisher_adaptive
-      doublevadd_component
-      doublevadd_component_fpga
-      adaptive_component::adaptive_component
-    )
-    ament_target_dependencies(doublevadd_publisher_adaptive
-      std_msgs
-      tracetools
-      tracetools_acceleration
-      class_loader
-      vitis_common)
+# Adaptive Node using an adaptive_component
+add_executable(doublevadd_publisher_adaptive src/doublevadd_publisher_adaptive.cpp)
+target_include_directories(doublevadd_publisher_adaptive PUBLIC include)
+target_link_libraries(doublevadd_publisher_adaptive
+  doublevadd_component
+  doublevadd_component_fpga
+  adaptive_component::adaptive_component
+)
+ament_target_dependencies(doublevadd_publisher_adaptive
+  std_msgs
+  tracetools
+  tracetools_acceleration
+  class_loader
+  vitis_common)
 
-      # Adaptive Node using an Adaptive Component (built with adaptive_component)
-      # NOTE: stateless
-      add_executable(doublevadd_publisher_adaptive_with_components src/doublevadd_publisher_adaptive_with_components.cpp)
-      target_include_directories(doublevadd_publisher_adaptive_with_components PUBLIC include)
-      target_link_libraries(doublevadd_publisher_adaptive_with_components
-        doublevadd_component_adaptive
-      )
-      ament_target_dependencies(doublevadd_publisher_adaptive_with_components
-        class_loader)
+# Adaptive Node using an Adaptive Component (built with adaptive_component)
+# NOTE: stateless
+add_executable(doublevadd_publisher_adaptive_with_components src/doublevadd_publisher_adaptive_with_components.cpp)
+target_include_directories(doublevadd_publisher_adaptive_with_components PUBLIC include)
+target_link_libraries(doublevadd_publisher_adaptive_with_components
+  doublevadd_component_adaptive
+)
+ament_target_dependencies(doublevadd_publisher_adaptive_with_components
+  class_loader)
 
-      # Adaptive stateful Node using an Adaptive Component (built with adaptive_component)
-      # NOTE: stateful
-      add_executable(doublevadd_publisher_adaptive_with_components_and_state
-        src/doublevadd_publisher_adaptive_with_components_and_state.cpp)
-      target_include_directories(doublevadd_publisher_adaptive_with_components_and_state PUBLIC include)
-      target_link_libraries(doublevadd_publisher_adaptive_with_components_and_state
-        doublevadd_component_adaptive_stateful
-      )
-      ament_target_dependencies(doublevadd_publisher_adaptive_with_components_and_state
-        class_loader)
-
-endif()  # ROS_VITIS
+# Adaptive stateful Node using an Adaptive Component (built with adaptive_component)
+# NOTE: stateful
+add_executable(doublevadd_publisher_adaptive_with_components_and_state
+  src/doublevadd_publisher_adaptive_with_components_and_state.cpp)
+target_include_directories(doublevadd_publisher_adaptive_with_components_and_state PUBLIC include)
+target_link_libraries(doublevadd_publisher_adaptive_with_components_and_state
+  doublevadd_component_adaptive_stateful
+)
+ament_target_dependencies(doublevadd_publisher_adaptive_with_components_and_state
+  class_loader)
+# endif()  # ROS_VITIS
 
 if(ROS_ACCELERATION)
   # C simulation and synthesis
@@ -207,19 +206,19 @@ set(install_components
 )
 
 
-if (DEFINED ROS_VITIS)
-  set (install_targets ${install_targets} 
-    doublevadd_publisher_adaptive
-    doublevadd_publisher_adaptive_with_components
-    doublevadd_publisher_adaptive_with_components_and_state
-    doublevadd_node_adaptive
-  )
-  set (install_components ${install_components} 
-    doublevadd_component_fpga
-    doublevadd_component_adaptive
-    doublevadd_component_adaptive_stateful
-  )
-endif()  # ROS_VITIS
+# if (DEFINED ROS_VITIS)
+set (install_targets ${install_targets} 
+  doublevadd_publisher_adaptive
+  doublevadd_publisher_adaptive_with_components
+  doublevadd_publisher_adaptive_with_components_and_state
+  doublevadd_node_adaptive
+)
+set (install_components ${install_components} 
+  doublevadd_component_fpga
+  doublevadd_component_adaptive
+  doublevadd_component_adaptive_stateful
+)
+# endif()  # ROS_VITIS
 
 # install targets
 install(TARGETS

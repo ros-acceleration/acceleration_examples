@@ -13,8 +13,8 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
-find_package(ament_vitis)
-find_package(ament_cuda)  # enable CUDA capabilities, if available
+find_package(ament_vitis QUIET) # enable Vitis capabilities, if available
+find_package(ament_cuda QUIET)  # enable CUDA capabilities, if available
 find_package(image_proc REQUIRED)
 
 include_directories(include)

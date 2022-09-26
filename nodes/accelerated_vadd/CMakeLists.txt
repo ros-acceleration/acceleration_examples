@@ -23,42 +23,41 @@ find_package(ament_vitis)
 #   ${OpenCL_LIBRARY}
 #   pthread)
 
-if (ROS_VITIS)
-  # accelerated_vadd
-  add_executable(accelerated_vadd
-    src/host.cpp
-  )
-  target_include_directories(accelerated_vadd PUBLIC include)
-  target_link_libraries(accelerated_vadd
-    ${OpenCL_LIBRARY}
-    pthread
-  )
-  ament_target_dependencies(accelerated_vadd
-    vitis_common
+# if (ROS_VITIS)
+# accelerated_vadd
+add_executable(accelerated_vadd
+  src/host.cpp
+)
+target_include_directories(accelerated_vadd PUBLIC include)
+target_link_libraries(accelerated_vadd
+  ${OpenCL_LIBRARY}
+  pthread
+)
+ament_target_dependencies(accelerated_vadd
+  vitis_common
+)
+
+# vadd kernel
+vitis_acceleration_kernel(
+  NAME vadd
+  FILE src/vadd.cpp
+  CONFIG src/kv260.cfg
+  CLOCK 100000000:vadd
+  INCLUDE
+    include
+  TYPE
+    # sw_emu
+    # hw_emu
+    hw
+  LINK
+  PACKAGE
   )
 
-  # vadd kernel
-  vitis_acceleration_kernel(
-    NAME vadd
-    FILE src/vadd.cpp
-    CONFIG src/kv260.cfg
-    CLOCK 100000000:vadd
-    INCLUDE
-      include
-    TYPE
-      # sw_emu
-      # hw_emu
-      hw
-    LINK
-    PACKAGE
-    )
-
-  install(TARGETS
-    accelerated_vadd
-    # accelerated_vadd_new
-    DESTINATION lib/${PROJECT_NAME}
-  )
-endif()  # ROS_VITIS
-
+install(TARGETS
+  accelerated_vadd
+  # accelerated_vadd_new
+  DESTINATION lib/${PROJECT_NAME}
+)
+# endif()  # ROS_VITIS
 
 ament_package()

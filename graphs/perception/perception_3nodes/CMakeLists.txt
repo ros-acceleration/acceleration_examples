@@ -15,11 +15,6 @@ find_package(ament_cuda QUIET)  # enable CUDA capabilities, if available
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
-if (DEFINED ROS_VITIS)
-  find_package(vitis_common)
-  find_package(OpenCL REQUIRED)  
-endif()
-
 include_directories(include)
 
 # create ament index resource which references the libraries in the binary dir
@@ -30,6 +25,9 @@ set(node_plugins "")
 set(CMAKE_CXX_FLAGS "-g -O2 -finstrument-functions")
 
 if (DEFINED ROS_VITIS)
+  find_package(vitis_common)
+  find_package(OpenCL REQUIRED)  
+
   # harris component, dependency with hls_stream.h Vitis-related header
   ament_auto_add_library(harris SHARED
     src/harris.cpp)

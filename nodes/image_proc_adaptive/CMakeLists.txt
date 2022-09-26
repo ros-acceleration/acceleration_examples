@@ -19,23 +19,24 @@ find_package(ament_vitis)
 # find_package(tracetools_acceleration REQUIRED)
 find_package(adaptive_component REQUIRED)
 
+
+find_package(vitis_common REQUIRED)
+find_package(OpenCL REQUIRED)
+
+include_directories(include)
+
+# create ament index resource which references the libraries in the binary dir
+set(node_plugins "")
+
+set(COMPONENT_AMENT_DEPENDENCIES
+  rclcpp
+  rclcpp_components
+  vitis_common
+  # tracetools
+  # tracetools_acceleration
+)
+
 if (ROS_VITIS)
-  find_package(vitis_common REQUIRED)
-  find_package(OpenCL REQUIRED)
-
-  include_directories(include)
-
-  # create ament index resource which references the libraries in the binary dir
-  set(node_plugins "")
-
-  set(COMPONENT_AMENT_DEPENDENCIES
-    rclcpp
-    rclcpp_components
-    vitis_common
-    # tracetools
-    # tracetools_acceleration
-  )
-
   add_library(image_proc_adaptive SHARED src/image_proc_adaptive.cpp)
   target_compile_definitions(image_proc_adaptive PRIVATE "COMPOSITION_BUILDING_DLL")
   target_link_libraries(image_proc_adaptive
