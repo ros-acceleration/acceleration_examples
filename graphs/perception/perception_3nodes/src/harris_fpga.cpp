@@ -273,14 +273,18 @@ void HarrisNodeFPGA::imageCb(
     image_proc_harris_cb_init,
     static_cast<const void *>(this),
     static_cast<const void *>(&(*image_msg)),
-    static_cast<const void *>(&(*info_msg)));
+    static_cast<const void *>(&(*info_msg)),
+    image_msg->header.stamp.nanosec,
+    image_msg->header.stamp.sec);
 
   if (pub_image_.getNumSubscribers() < 1) {
     TRACEPOINT(
       image_proc_harris_cb_fini,
       static_cast<const void *>(this),
       static_cast<const void *>(&(*image_msg)),
-      static_cast<const void *>(&(*info_msg)));
+      static_cast<const void *>(&(*info_msg)),
+      image_msg->header.stamp.nanosec,
+      image_msg->header.stamp.sec);
     return;
   }
 
@@ -293,13 +297,17 @@ void HarrisNodeFPGA::imageCb(
       image_proc_harris_cb_fini,
       static_cast<const void *>(this),
       static_cast<const void *>(&(*image_msg)),
-      static_cast<const void *>(&(*info_msg)));
+      static_cast<const void *>(&(*info_msg)),
+      image_msg->header.stamp.nanosec,
+      image_msg->header.stamp.sec);
     RCLCPP_ERROR(this->get_logger(), "cv_bridge exception: %s", e.what());
     TRACEPOINT(
       image_proc_harris_cb_fini,
       static_cast<const void *>(this),
       static_cast<const void *>(&(*image_msg)),
-      static_cast<const void *>(&(*info_msg)));
+      static_cast<const void *>(&(*info_msg)),
+      image_msg->header.stamp.nanosec,
+      image_msg->header.stamp.sec);
     return;
   }
 
@@ -307,7 +315,9 @@ void HarrisNodeFPGA::imageCb(
     image_proc_harris_init,
     static_cast<const void *>(this),
     static_cast<const void *>(&(*image_msg)),
-    static_cast<const void *>(&(*info_msg)));
+    static_cast<const void *>(&(*info_msg)),
+    image_msg->header.stamp.nanosec,
+    image_msg->header.stamp.sec);
 
   cv::Mat in_img, ocv_out_img;
   cv_ptr->image.copyTo(in_img);
@@ -318,7 +328,9 @@ void HarrisNodeFPGA::imageCb(
     image_proc_harris_fini,
     static_cast<const void *>(this),
     static_cast<const void *>(&(*image_msg)),
-    static_cast<const void *>(&(*info_msg)));
+    static_cast<const void *>(&(*info_msg)),
+    image_msg->header.stamp.nanosec,
+    image_msg->header.stamp.sec);
 
   // Allocate new rectified image message
   sensor_msgs::msg::Image::SharedPtr harris_msg = cv_bridge::CvImage(
@@ -333,7 +345,9 @@ void HarrisNodeFPGA::imageCb(
     image_proc_harris_cb_fini,
     static_cast<const void *>(this),
     static_cast<const void *>(&(*image_msg)),
-    static_cast<const void *>(&(*info_msg)));
+    static_cast<const void *>(&(*info_msg)),
+    image_msg->header.stamp.nanosec,
+    image_msg->header.stamp.sec);
 }
 
 }  // namespace perception_3nodes

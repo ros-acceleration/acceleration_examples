@@ -107,14 +107,18 @@ void ResizeNodeFPGAStreamlined::imageCb(
     image_proc_resize_cb_init,
     static_cast<const void *>(this),
     static_cast<const void *>(&(*image_msg)),
-    static_cast<const void *>(&(*info_msg)));
+    static_cast<const void *>(&(*info_msg)),
+    image_msg->header.stamp.nanosec,
+    image_msg->header.stamp.sec);
 
   if (pub_image_.getNumSubscribers() < 1) {
     TRACEPOINT(
       image_proc_resize_cb_fini,
       static_cast<const void *>(this),
       static_cast<const void *>(&(*image_msg)),
-      static_cast<const void *>(&(*info_msg)));
+      static_cast<const void *>(&(*info_msg)),
+      image_msg->header.stamp.nanosec,
+      image_msg->header.stamp.sec);
     return;
   }
 
@@ -136,7 +140,9 @@ void ResizeNodeFPGAStreamlined::imageCb(
       image_proc_resize_cb_fini,
       static_cast<const void *>(this),
       static_cast<const void *>(&(*image_msg)),
-      static_cast<const void *>(&(*info_msg)));
+      static_cast<const void *>(&(*info_msg)),
+      image_msg->header.stamp.nanosec,
+      image_msg->header.stamp.sec);
     return;
   }
 
@@ -175,7 +181,9 @@ void ResizeNodeFPGAStreamlined::imageCb(
     image_proc_resize_init,
     static_cast<const void *>(this),
     static_cast<const void *>(&(*image_msg)),
-    static_cast<const void *>(&(*info_msg)));
+    static_cast<const void *>(&(*info_msg)),
+    image_msg->header.stamp.nanosec,
+    image_msg->header.stamp.sec);
   // OpenCL section:
   cl_int err;
   size_t image_in_size_bytes, image_out_size_bytes;
@@ -261,7 +269,9 @@ void ResizeNodeFPGAStreamlined::imageCb(
     image_proc_resize_fini,
     static_cast<const void *>(this),
     static_cast<const void *>(&(*image_msg)),
-    static_cast<const void *>(&(*info_msg)));
+    static_cast<const void *>(&(*info_msg)),
+    image_msg->header.stamp.nanosec,
+    image_msg->header.stamp.sec);
 
   // pub_image_.publish(*output_image.toImageMsg(), *dst_info_msg);
 
@@ -269,7 +279,9 @@ void ResizeNodeFPGAStreamlined::imageCb(
     image_proc_resize_cb_fini,
     static_cast<const void *>(this),
     static_cast<const void *>(&(*image_msg)),
-    static_cast<const void *>(&(*info_msg)));
+    static_cast<const void *>(&(*info_msg)),
+    image_msg->header.stamp.nanosec,
+    image_msg->header.stamp.sec);
 
 }
 
