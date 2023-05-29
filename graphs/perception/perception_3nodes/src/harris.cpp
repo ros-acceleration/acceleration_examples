@@ -1,3 +1,8 @@
+/* Modification Copyright (c) 2023, Acceleration Robotics®
+   Author: Alejandra Martínez Fariña <alex@accelerationrobotics.com>
+   Based on:
+*/
+
 // Copyright 2022 Víctor Mayoral-Vilches
 // All rights reserved.
 
@@ -27,6 +32,7 @@
 #include "tracetools_image_pipeline/tracetools.h"
 #include "harris.hpp"
 #include "xf_ocv_ref.hpp"
+#include <rclcpp/serialization.hpp>
 
 #define FILTER_WIDTH 3
 #define BLOCK_WIDTH 3
@@ -166,6 +172,26 @@ void HarrisNode::harrisImage2(
   }
 }
 
+size_t HarrisNode::get_msg_size(sensor_msgs::msg::Image::ConstSharedPtr image_msg){
+  //Serialize the Image and CameraInfo messages
+  rclcpp::SerializedMessage serialized_data_img;
+  rclcpp::Serialization<sensor_msgs::msg::Image> image_serialization;
+  const void* image_ptr = reinterpret_cast<const void*>(image_msg.get());
+  image_serialization.serialize_message(image_ptr, &serialized_data_img);
+  size_t image_msg_size = serialized_data_img.size();
+  return image_msg_size;
+}
+
+size_t HarrisNode::get_msg_size(sensor_msgs::msg::CameraInfo::ConstSharedPtr info_msg){
+  rclcpp::SerializedMessage serialized_data_info;
+  rclcpp::Serialization<sensor_msgs::msg::CameraInfo> info_serialization;
+  const void* info_ptr = reinterpret_cast<const void*>(info_msg.get());
+  info_serialization.serialize_message(info_ptr, &serialized_data_info);
+  size_t info_msg_size = serialized_data_info.size();
+  return info_msg_size;
+}
+
+
 void HarrisNode::imageCb(
   sensor_msgs::msg::Image::ConstSharedPtr image_msg,
   sensor_msgs::msg::CameraInfo::ConstSharedPtr info_msg)
@@ -176,7 +202,9 @@ void HarrisNode::imageCb(
     static_cast<const void *>(&(*image_msg)),
     static_cast<const void *>(&(*info_msg)),
     image_msg->header.stamp.nanosec,
-    image_msg->header.stamp.sec);    
+    image_msg->header.stamp.sec,
+    get_msg_size(image_msg),
+    get_msg_size(info_msg));    
 
   if (pub_image_.getNumSubscribers() < 1) {
     TRACEPOINT(
@@ -185,7 +213,9 @@ void HarrisNode::imageCb(
       static_cast<const void *>(&(*image_msg)),
       static_cast<const void *>(&(*info_msg)),
       image_msg->header.stamp.nanosec,
-      image_msg->header.stamp.sec);
+      image_msg->header.stamp.sec,
+      get_msg_size(image_msg),
+      get_msg_size(info_msg));
     return;
   }
 
@@ -200,7 +230,9 @@ void HarrisNode::imageCb(
       static_cast<const void *>(&(*image_msg)),
       static_cast<const void *>(&(*info_msg)),
       image_msg->header.stamp.nanosec,
-      image_msg->header.stamp.sec);
+      image_msg->header.stamp.sec,
+      get_msg_size(image_msg),
+      get_msg_size(info_msg));
     RCLCPP_ERROR(this->get_logger(), "cv_bridge exception: %s", e.what());
     TRACEPOINT(
       image_proc_harris_cb_fini,
@@ -208,7 +240,9 @@ void HarrisNode::imageCb(
       static_cast<const void *>(&(*image_msg)),
       static_cast<const void *>(&(*info_msg)),
       image_msg->header.stamp.nanosec,
-      image_msg->header.stamp.sec);
+      image_msg->header.stamp.sec,
+      get_msg_size(image_msg),
+      get_msg_size(info_msg));
     return;
   }
 
@@ -245,10 +279,12 @@ void HarrisNode::imageCb(
   TRACEPOINT(
     image_proc_harris_cb_fini,
     static_cast<const void *>(this),
-    static_cast<const void *>(&(*image_msg)),
+    static_cast<const void *>(&(*harris_msg)),
     static_cast<const void *>(&(*info_msg)),
     image_msg->header.stamp.nanosec,
-    image_msg->header.stamp.sec);
+    image_msg->header.stamp.sec,
+    get_msg_size(harris_msg),
+    get_msg_size(info_msg));
 }
 
 }  // namespace image_proc

@@ -1,4 +1,7 @@
 /*
+    Modification Copyright (c) 2023, Acceleration Robotics®
+    Author: Alejandra Martínez Fariña <alex@accelerationrobotics.com>
+    Based on:
       ____  ____
      /   /\/   /
     /___/  \  /   Copyright (c) 2021, Xilinx®.
@@ -34,6 +37,7 @@
 
 #include "rectify_fpga.hpp"
 #include "tracetools_image_pipeline/tracetools.h"
+#include <rclcpp/serialization.hpp>
 
 namespace image_geometry
 {
@@ -224,6 +228,25 @@ void RectifyNodeFPGAStreamlined::subscribeToCamera()
   // }
 }
 
+size_t RectifyNodeFPGAStreamlined::get_msg_size(sensor_msgs::msg::Image::ConstSharedPtr image_msg){
+  //Serialize the Image and CameraInfo messages
+  rclcpp::SerializedMessage serialized_data_img;
+  rclcpp::Serialization<sensor_msgs::msg::Image> image_serialization;
+  const void* image_ptr = reinterpret_cast<const void*>(image_msg.get());
+  image_serialization.serialize_message(image_ptr, &serialized_data_img);
+  size_t image_msg_size = serialized_data_img.size();
+  return image_msg_size;
+}
+
+size_t RectifyNodeFPGAStreamlined::get_msg_size(sensor_msgs::msg::CameraInfo::ConstSharedPtr info_msg){
+  rclcpp::SerializedMessage serialized_data_info;
+  rclcpp::Serialization<sensor_msgs::msg::CameraInfo> info_serialization;
+  const void* info_ptr = reinterpret_cast<const void*>(info_msg.get());
+  info_serialization.serialize_message(info_ptr, &serialized_data_info);
+  size_t info_msg_size = serialized_data_info.size();
+  return info_msg_size;
+}
+
 void RectifyNodeFPGAStreamlined::imageCb(
   const sensor_msgs::msg::Image::ConstSharedPtr & image_msg,
   const sensor_msgs::msg::CameraInfo::ConstSharedPtr & info_msg)
@@ -236,7 +259,9 @@ void RectifyNodeFPGAStreamlined::imageCb(
     static_cast<const void *>(&(*image_msg)),
     static_cast<const void *>(&(*info_msg)),
     image_msg->header.stamp.nanosec,
-    image_msg->header.stamp.sec);
+    image_msg->header.stamp.sec,
+    get_msg_size(image_msg),
+    get_msg_size(info_msg));
 
   if (pub_rect_.getNumSubscribers() < 1) {
     TRACEPOINT(
@@ -245,7 +270,9 @@ void RectifyNodeFPGAStreamlined::imageCb(
       static_cast<const void *>(&(*image_msg)),
       static_cast<const void *>(&(*info_msg)),
       image_msg->header.stamp.nanosec,
-      image_msg->header.stamp.sec);
+      image_msg->header.stamp.sec,
+      get_msg_size(image_msg),
+      get_msg_size(info_msg));
     return;
   }
 
@@ -260,7 +287,9 @@ void RectifyNodeFPGAStreamlined::imageCb(
       static_cast<const void *>(&(*image_msg)),
       static_cast<const void *>(&(*info_msg)),
       image_msg->header.stamp.nanosec,
-      image_msg->header.stamp.sec);
+      image_msg->header.stamp.sec,
+      get_msg_size(image_msg),
+      get_msg_size(info_msg));
     return;
   }
 
@@ -283,7 +312,9 @@ void RectifyNodeFPGAStreamlined::imageCb(
       static_cast<const void *>(&(*image_msg)),
       static_cast<const void *>(&(*info_msg)),
       image_msg->header.stamp.nanosec,
-      image_msg->header.stamp.sec);
+      image_msg->header.stamp.sec,
+      get_msg_size(image_msg),
+      get_msg_size(info_msg));
     return;
   }
 
@@ -314,18 +345,20 @@ void RectifyNodeFPGAStreamlined::imageCb(
     image_msg->header.stamp.nanosec,
     image_msg->header.stamp.sec);
 
-  // // Allocate new rectified image message
-  // sensor_msgs::msg::Image::SharedPtr rect_msg =
-  //   cv_bridge::CvImage(image_msg->header, image_msg->encoding, rect).toImageMsg();
+  // Allocate new rectified image message
+  sensor_msgs::msg::Image::SharedPtr rect_msg =
+    cv_bridge::CvImage(image_msg->header, image_msg->encoding, rect).toImageMsg();
   // pub_rect_.publish(rect_msg);
 
   TRACEPOINT(
     image_proc_rectify_cb_fini,
     static_cast<const void *>(this),
-    static_cast<const void *>(&(*image_msg)),
+    static_cast<const void *>(&(*rect_msg)),
     static_cast<const void *>(&(*info_msg)),
     image_msg->header.stamp.nanosec,
-    image_msg->header.stamp.sec);
+    image_msg->header.stamp.sec,
+    get_msg_size(rect_msg),
+    get_msg_size(info_msg));
 }
 
 }  // namespace perception_3nodes
