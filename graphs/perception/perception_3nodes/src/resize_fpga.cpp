@@ -131,7 +131,9 @@ void ResizeNodeFPGAStreamlined::imageCb(
     static_cast<const void *>(&(*image_msg)),
     static_cast<const void *>(&(*info_msg)),
     image_msg->header.stamp.nanosec,
-    image_msg->header.stamp.sec);
+    image_msg->header.stamp.sec,
+    get_msg_size(image_msg),
+    get_msg_size(info_msg));
 
   if (pub_image_.getNumSubscribers() < 1) {
     TRACEPOINT(
