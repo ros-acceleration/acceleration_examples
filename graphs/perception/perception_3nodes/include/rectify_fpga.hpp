@@ -1,4 +1,7 @@
 /*
+    Modification Copyright (c) 2023, Acceleration Robotics®
+    Author: Alejandra Martínez Fariña <alex@accelerationrobotics.com>
+    Based on:
       ____  ____
      /   /\/   /
     /___/  \  /   Copyright (c) 2021, Xilinx®.
@@ -86,6 +89,9 @@ private:
 
   // Processing state (note: only safe because we're using single-threaded NodeHandle!)
   image_geometry::PinholeCameraModelFPGAStreamlined model_;
+
+  size_t get_msg_size(sensor_msgs::msg::Image::ConstSharedPtr image_msg);
+  size_t get_msg_size(sensor_msgs::msg::CameraInfo::ConstSharedPtr info_msg);
 
   void subscribeToCamera();
   void imageCb(

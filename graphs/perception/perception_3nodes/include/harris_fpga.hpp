@@ -1,3 +1,8 @@
+/* Modification Copyright (c) 2023, Acceleration Robotics®
+   Author: Alejandra Martínez Fariña <alex@accelerationrobotics.com>
+   Based on:
+*/
+
 // Copyright 2022 Víctor Mayoral-Vilches
 // All rights reserved.
 
@@ -54,6 +59,10 @@ protected:
   cl::CommandQueue* queue_;
 
   std::mutex connect_mutex_;
+
+  size_t get_msg_size(sensor_msgs::msg::Image::ConstSharedPtr image_msg);
+  size_t get_msg_size(sensor_msgs::msg::CameraInfo::ConstSharedPtr info_msg);
+
 
   void imageCb(
     sensor_msgs::msg::Image::ConstSharedPtr image_msg,

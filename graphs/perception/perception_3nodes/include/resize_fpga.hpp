@@ -1,4 +1,7 @@
 /*
+    Modification Copyright (c) 2023, Acceleration Robotics®
+    Author: Alejandra Martínez Fariña <alex@accelerationrobotics.com>
+    Based on:
       ____  ____
      /   /\/   /
     /___/  \  /   Copyright (c) 2021, Xilinx®.
@@ -65,6 +68,10 @@ protected:
   std::mutex connect_mutex_;
 
   void connectCb();
+
+  size_t get_msg_size(sensor_msgs::msg::Image::ConstSharedPtr image_msg);
+  size_t get_msg_size(sensor_msgs::msg::CameraInfo::ConstSharedPtr info_msg);
+
 
   void imageCb(
     sensor_msgs::msg::Image::ConstSharedPtr image_msg,
