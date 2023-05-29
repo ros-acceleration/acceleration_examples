@@ -268,27 +268,27 @@ void ResizeNodeFPGAStreamlined::imageCb(
   queue_->finish();
 
 
-  // // Set the output image
-  // cv_bridge::CvImage output_image;
-  // output_image.header = cv_ptr->header;
-  // output_image.encoding = cv_ptr->encoding;
-  // if (gray) {
-  //   output_image.image =
-  //         cv::Mat{
-  //             static_cast<int>(dst_info_msg->height),
-  //             static_cast<int>(dst_info_msg->width),
-  //             CV_8UC1,
-  //             result_hls.data
-  //         };
-  // } else {
-  //   output_image.image =
-  //         cv::Mat{
-  //             static_cast<int>(dst_info_msg->height),
-  //             static_cast<int>(dst_info_msg->width),
-  //             CV_8UC3,
-  //             result_hls.data
-  //         };
-  // }
+  // Set the output image
+  cv_bridge::CvImage output_image;
+  output_image.header = cv_ptr->header;
+  output_image.encoding = cv_ptr->encoding;
+  if (gray) {
+    output_image.image =
+          cv::Mat{
+              static_cast<int>(dst_info_msg->height),
+              static_cast<int>(dst_info_msg->width),
+              CV_8UC1,
+              result_hls.data
+          };
+  } else {
+    output_image.image =
+          cv::Mat{
+              static_cast<int>(dst_info_msg->height),
+              static_cast<int>(dst_info_msg->width),
+              CV_8UC3,
+              result_hls.data
+          };
+  }
 
 
   TRACEPOINT(
