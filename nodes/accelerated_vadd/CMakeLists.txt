@@ -21,7 +21,6 @@ find_package(ament_vitis)
 #   ${OpenCL_LIBRARY}
 #   pthread)
 
-if (ROS_ACCELERATION)
 if (ROS_VITIS)
   find_package(vitis_common REQUIRED)
   find_package(OpenCL REQUIRED)
