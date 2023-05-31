@@ -11,9 +11,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
-find_package(OpenCL REQUIRED)
 find_package(Threads REQUIRED)
-find_package(vitis_common REQUIRED)
 find_package(ament_vitis)
 
 # add_executable(accelerated_vadd_new
@@ -23,41 +21,45 @@ find_package(ament_vitis)
 #   ${OpenCL_LIBRARY}
 #   pthread)
 
-# if (ROS_VITIS)
-# accelerated_vadd
-add_executable(accelerated_vadd
-  src/host.cpp
-)
-target_include_directories(accelerated_vadd PUBLIC include)
-target_link_libraries(accelerated_vadd
-  ${OpenCL_LIBRARY}
-  pthread
-)
-ament_target_dependencies(accelerated_vadd
-  vitis_common
-)
+if (ROS_ACCELERATION)
+if (ROS_VITIS)
+  find_package(vitis_common REQUIRED)
+  find_package(OpenCL REQUIRED)
 
-# vadd kernel
-vitis_acceleration_kernel(
-  NAME vadd
-  FILE src/vadd.cpp
-  CONFIG src/kv260.cfg
-  CLOCK 100000000:vadd
-  INCLUDE
-    include
-  TYPE
-    # sw_emu
-    # hw_emu
-    hw
-  LINK
-  PACKAGE
+  # accelerated_vadd
+  add_executable(accelerated_vadd
+    src/host.cpp
+  )
+  target_include_directories(accelerated_vadd PUBLIC include)
+  target_link_libraries(accelerated_vadd
+    ${OpenCL_LIBRARY}
+    pthread
+  )
+  ament_target_dependencies(accelerated_vadd
+    vitis_common
   )
 
-install(TARGETS
-  accelerated_vadd
-  # accelerated_vadd_new
-  DESTINATION lib/${PROJECT_NAME}
-)
-# endif()  # ROS_VITIS
+  # vadd kernel
+  vitis_acceleration_kernel(
+    NAME vadd
+    FILE src/vadd.cpp
+    CONFIG src/kv260.cfg
+    CLOCK 100000000:vadd
+    INCLUDE
+      include
+    TYPE
+      # sw_emu
+      # hw_emu
+      hw
+    LINK
+    PACKAGE
+    )
+
+  install(TARGETS
+    accelerated_vadd
+    # accelerated_vadd_new
+    DESTINATION lib/${PROJECT_NAME}
+  )
+endif()  # ROS_VITIS
 
 ament_package()
