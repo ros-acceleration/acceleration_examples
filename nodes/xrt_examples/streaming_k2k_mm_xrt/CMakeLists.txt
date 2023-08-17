@@ -14,7 +14,6 @@ find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 find_package(ament_cmake REQUIRED)
 find_package(ament_vitis)
-find_package(vitis_common REQUIRED)
 
 include_directories(include)
 
@@ -27,6 +26,7 @@ set(CMAKE_CXX_FLAGS "-g -O2 -finstrument-functions")
 
 if(ROS_ACCELERATION)  
   if (DEFINED ROS_VITIS)
+    find_package(vitis_common REQUIRED)
 
     # build and install binary only if cross-compiling
     if (DEFINED ROS_XRT)
@@ -79,7 +79,7 @@ if(ROS_ACCELERATION)
       CONFIG src/krnl_stream_vadd_vmult.cfg
     )
 
-  endif()
-endif()
+  endif()  # ROS_VITIS
+endif()  # ROS_ACCELERATION
 
 ament_package()
