@@ -17,44 +17,46 @@ find_package(ament_vitis)
 # simple_adder1
 ################
 if(ROS_ACCELERATION)
-  # C simulation and synthesis
-  vitis_hls_generate_tcl(
-    PROJECT
-      project_simpleadder1
-    SRC
-      src/adder1.cpp
-    HEADERS
-      include
-    TESTBENCH
-      src/testbench1.cpp
-    TOPFUNCTION
-      simple_adder
-    CLOCK
-      4
-    SYNTHESIS
-  )
+  if (ROS_VITIS)
+    # C simulation and synthesis
+    vitis_hls_generate_tcl(
+      PROJECT
+        project_simpleadder1
+      SRC
+        src/adder1.cpp
+      HEADERS
+        include
+      TESTBENCH
+        src/testbench1.cpp
+      TOPFUNCTION
+        simple_adder
+      CLOCK
+        4
+      SYNTHESIS
+    )
 
-  #---------------------
-  # NOTE: uncomment if
-  # hw kernel is desired
-  #----------------------
-  
-  # kernel
-  vitis_acceleration_kernel(
-    NAME simple_adder
-    FILE src/adder1.cpp
-    CONFIG src/kv260.cfg
-    CLOCK 100000000:simple_adder
-    INCLUDE
-      include
-    TYPE
-      # sw_emu
-      # hw_emu
-      hw
-    LINK
-    PACKAGE
-  )
-endif()
+    #---------------------
+    # NOTE: uncomment if
+    # hw kernel is desired
+    #----------------------
+    
+    # kernel
+    vitis_acceleration_kernel(
+      NAME simple_adder
+      FILE src/adder1.cpp
+      CONFIG src/kv260.cfg
+      CLOCK 100000000:simple_adder
+      INCLUDE
+        include
+      TYPE
+        # sw_emu
+        # hw_emu
+        hw
+      LINK
+      PACKAGE
+    )
+  endif()  # ROS_VITIS
+endif()  # ROS_ACCELERATION
 
 # cross-compilation
 add_executable(simple_adder1 src/testbench1.cpp src/adder1.cpp)
@@ -72,6 +74,7 @@ install(TARGETS
 ################
 
 if(ROS_ACCELERATION)
+  if (ROS_VITIS)
   # C simulation and synthesis
   vitis_hls_generate_tcl(
     PROJECT
@@ -107,7 +110,8 @@ if(ROS_ACCELERATION)
   #     hw
   #   PACKAGE
   # )
-endif()
+  endif()  # ROS_VITIS  
+endif()  #ROS_ACCELERATION
 
 # cross-compilation
 add_executable(simple_adder2 src/testbench2.cpp src/adder2.cpp)
