@@ -21,6 +21,7 @@
 set_shell_parameter ROS2_SDT_PACKAGE_SRC_FILE "/tmp/ros2_sdr_package_src"
 set_shell_parameter ROS2_FIRMWARE_PATH "/tmp/ros2_firmware_path"
 set_shell_parameter KRNL_NAME_PATH "/tmp/krnl_name"
+set_shell_parameter BUILD_TYPE_PATH "/tmp/build_type"
 set_shell_parameter AVMM_HOST {auto}
 
 # define the procedures used by the create_subsystems_qsys.tcl script
@@ -46,6 +47,7 @@ proc build_kernel {} {
   set v_subsystem_ip_path_user  [get_shell_parameter SUBSYSTEM_IP_PATH_USER]  
   set v_target_device           [get_shell_parameter DEVICE]
   set v_kernel_name_path        [get_shell_parameter KRNL_NAME_PATH]
+  set v_build_type_path         [get_shell_parameter BUILD_TYPE_PATH]
 
   # kernel name
   if {[file exists $v_kernel_name_path]} {
@@ -57,6 +59,17 @@ proc build_kernel {} {
       exit
   }
   set v_kernel_name [string trim $v_kernel_name]
+
+  # build type
+  if {[file exists $v_build_type_path]} {
+      set fileId [open $v_build_type_path "r"]
+      set v_built_type [read $fileId]
+      close $fileId
+  } else {
+      puts "File $v_build_type_path does not exist"
+      exit
+  }
+  # set v_built_type [string trim $v_built_type]
 
   # Set up the CMake infrastructure
   set init_dir [pwd]
@@ -72,27 +85,99 @@ proc build_kernel {} {
   # # Internal ARC setting
   # set ld_preload_paths ""
 
-set cmd $ld_preload_paths
+  # Cmake setup
+  set cmd $ld_preload_paths
   append cmd "cmake .. -DFPGA_DEVICE=$v_target_device"
   set result_failed [catch {exec sh -c "$cmd"}  result_text]
   puts $cmd
   puts "result_failed -> $result_failed"  
 
-  set cmd $ld_preload_paths
-  append cmd "make fpga_ip_export"
-  set result_failed [catch {exec sh -c "$cmd"}  result_text]
-  puts $cmd
-  puts "result_failed -> $result_failed"
+  # # FPGA Emulator
+  # set cmd $ld_preload_paths
+  # append cmd "make fpga_emu"
+  # set result_failed [catch {exec sh -c "$cmd"}  result_text]
+  # puts $cmd
+  # puts "result_failed -> $result_failed"
 
-  cd $v_kernel_name.fpga_ip_export.prj
-  exec python ${v_kernel_name}_fpga_ip_export_di_hw_tcl_adjustment_script.py
+  # # Optimization Report
+  # set cmd $ld_preload_paths
+  # append cmd "make report"
+  # set result_failed [catch {exec sh -c "$cmd"}  result_text]
+  # puts $cmd
+  # puts "result_failed -> $result_failed"
+
+  # # FPGA Simulator
+  # set cmd $ld_preload_paths
+  # append cmd "make fpga_sim"
+  # set result_failed [catch {exec sh -c "$cmd"}  result_text]
+  # puts $cmd
+  # puts "result_failed -> $result_failed"
+
+  # # FPGA Hardware
+  # set cmd $ld_preload_paths
+  # append cmd "make fpga_ip_export"
+  # set result_failed [catch {exec sh -c "$cmd"}  result_text]
+  # puts $cmd
+  # puts "result_failed -> $result_failed"
+  # cd $v_kernel_name.fpga_ip_export.prj
+  # exec python ${v_kernel_name}_fpga_ip_export_di_hw_tcl_adjustment_script.py
+
+  ## Consider the build type passed as an argument
+  # FPGA Emulator
+  if {[string first "fpga_emu" $v_built_type] != -1} {
+      puts "Build type includes 'fpga_emu'."
+      set cmd $ld_preload_paths
+      append cmd "make fpga_emu"
+      set result_failed [catch {exec sh -c "$cmd"}  result_text]
+      puts $cmd
+      puts "result_failed -> $result_failed"
+  } else {    
+      puts "Build type does NOT include 'fpga_emu'."
+  }
+
+  # Optimization Report
+  if {[string first "report" $v_built_type] != -1} {
+      puts "Build type includes 'report'."
+      set cmd $ld_preload_paths
+      append cmd "make report"
+      set result_failed [catch {exec sh -c "$cmd"}  result_text]
+      puts $cmd
+      puts "result_failed -> $result_failed"
+  } else {    
+      puts "Build type does NOT include 'report'."
+  }
+
+  # FPGA Simulator
+  if {[string first "fpga_sim" $v_built_type] != -1} {
+      puts "Build type includes 'fpga_sim'."
+      set cmd $ld_preload_paths
+      append cmd "make fpga_sim"
+      set result_failed [catch {exec sh -c "$cmd"}  result_text]
+      puts $cmd
+      puts "result_failed -> $result_failed"
+  } else {    
+      puts "Build type does NOT include 'fpga_sim'."
+  }
+
+  # FPGA Hardware 
+  #  NOTE: through "fpga_ip_export", "fpga" is not used for now
+  if {[string first "fpga_ip_export" $v_built_type] != -1} {
+      puts "Build type includes 'fpga_ip_export'."
+      set cmd $ld_preload_paths
+      append cmd "make fpga_ip_export"
+      set result_failed [catch {exec sh -c "$cmd"}  result_text]
+      puts $cmd
+      puts "result_failed -> $result_failed"
+      cd $v_kernel_name.fpga_ip_export.prj
+      exec python ${v_kernel_name}_fpga_ip_export_di_hw_tcl_adjustment_script.py
+  } else {    
+      puts "Build type does NOT include 'fpga_ip_export'."
+  }
 
   cd $init_dir
 }
 
 #==========================================================
-
-# copy files from the shell install directory to the target project directory
 
 # copy files from the shell install directory to the target project directory
 
