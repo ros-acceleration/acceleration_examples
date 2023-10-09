@@ -89,25 +89,41 @@ if (ROS_ACCELERATION)
   if (ROS_ONEAPI)
     find_package(tracetools_acceleration REQUIRED)
 
-    # kernel_driver
-    add_executable(kernel_driver
-      src/kernel_driver.cpp
+    # # kernel_driver
+    # # NOTE: only for prototyping purposes
+    #
+    # add_executable(kernel_driver
+    #   src/kernel_driver.cpp
+    # )
+    # target_include_directories(kernel_driver PUBLIC include)
+    # target_link_libraries(kernel_driver
+    #   pthread
+    # )
+    # ament_target_dependencies(kernel_driver
+    #   rclcpp
+    #   std_msgs
+    # )
+
+    # Create avalonmm_driver library
+    add_library(avalonmm_driver src/avalonmm_driver.cpp)
+    # target_include_directories(avalonmm_driver PUBLIC include)
+    target_include_directories(avalonmm_driver PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:include>)
+    
+    # install headers
+    install(DIRECTORY include/
+      DESTINATION include/${PROJECT_NAME}
     )
-    target_include_directories(kernel_driver PUBLIC include)
-    target_link_libraries(kernel_driver
-      pthread
-    )
-    ament_target_dependencies(kernel_driver
-      rclcpp
-      std_msgs
-    )
+    
 
     # accelerated_doublevadd_publisher_agilex
     add_executable(accelerated_doublevadd_publisher_agilex
-      src/accelerated_doublevadd_publisher_agilex.cpp src/avalonmm_driver.cpp
+      src/accelerated_doublevadd_publisher_agilex.cpp
     )
     target_include_directories(accelerated_doublevadd_publisher_agilex PUBLIC include)
     target_link_libraries(accelerated_doublevadd_publisher_agilex
+      avalonmm_driver
       pthread
     )
     ament_target_dependencies(accelerated_doublevadd_publisher_agilex
@@ -116,6 +132,19 @@ if (ROS_ACCELERATION)
       tracetools 
       tracetools_acceleration
     )
+
+    # export
+    ament_export_include_directories(include)
+    ament_export_libraries(avalonmm_driver)
+    ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+    install(TARGETS 
+      avalonmm_driver
+      EXPORT export_${PROJECT_NAME}
+      LIBRARY DESTINATION lib
+      ARCHIVE DESTINATION lib
+      RUNTIME DESTINATION bin
+      INCLUDES DESTINATION include
+    )        
 
     # # sadd kernel
     # oneapi_acceleration_kernel(
@@ -135,8 +164,8 @@ if (ROS_ACCELERATION)
 
     # vadd kernel
     oneapi_acceleration_kernel(
-      NAME accelerated_vadd
-      FILE src/vadd_oneapi.cpp
+      NAME accelerated_doublevadd
+      FILE src/doublevadd_oneapi.cpp
       FPGA_EMIF_ENABLED 0
       FPGA_EMIF_CTRL_BASE_ADDRESS 0x4000
       FPGA_EMIF_HOST_ADDR_WIDTH 31
@@ -154,7 +183,7 @@ if (ROS_ACCELERATION)
 
     install(
       TARGETS
-        kernel_driver
+        # kernel_driver
         accelerated_doublevadd_publisher_agilex
       DESTINATION 
         lib/${PROJECT_NAME}

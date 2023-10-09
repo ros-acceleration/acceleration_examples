@@ -20,23 +20,28 @@ target_include_directories(vadd_publisher PUBLIC include)
 ament_target_dependencies(vadd_publisher rclcpp std_msgs)
 
 if(ROS_ACCELERATION)
-  # C simulation and synthesis
-  vitis_hls_generate_tcl(
-    PROJECT
-      project_vadd_publisher
-    SRC
-      src/vadd.cpp
-    HEADERS
-      include
-    TESTBENCH
-      src/testbench.cpp
-    TOPFUNCTION
-      vadd
-    CLOCK
-      4
-    SYNTHESIS
-  )
-endif()
+  if (ROS_VITIS)
+    # C simulation and synthesis
+    vitis_hls_generate_tcl(
+      PROJECT
+        project_vadd_publisher
+      SRC
+        src/vadd.cpp
+      HEADERS
+        include
+      TESTBENCH
+        src/testbench.cpp
+      TOPFUNCTION
+        vadd
+      CLOCK
+        4
+      SYNTHESIS
+    )
+  endif()  # ROS_VITIS
+  if (ROS_ONEAPI)    
+
+  endif()  # ROS_ONEAPI
+endif()  # ROS_ACCELERATION
 
 install(TARGETS
   vadd_publisher

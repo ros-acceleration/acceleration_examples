@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
+  <name>accelerated_vadd_publisher</name>
+  <version>0.1.0</version>
+  <description>A trivial double vector-add ROS 2 publisher that adds two
+    inputs to a vector in a loop and attempts to publish them on the go 
+    at 10 Hz. Vector add operations are offloaded into to the FPGA.
+  </description>
+  <maintainer email="victor@accelerationrobotics.com">Víctor Mayoral Vilches</maintainer>
+  <license>Apache License 2.0</license>
+  <author email="victor@accelerationrobotics.com">Víctor Mayoral Vilches</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_vitis</buildtool_depend>
+  <buildtool_depend>ament_oneapi</buildtool_depend>
+
+  <depend>acceleration_firmware_agilex7</depend>
+  <depend>accelerated_doublevadd_publisher</depend>
+
+  <build_depend>rclcpp</build_depend>
+  <build_depend>std_msgs</build_depend>  
+  <build_depend>tracetools</build_depend>
+  <build_depend>ament_acceleration</build_depend>
+  <!-- <build_depend>acceleration_firmware_kv260</build_depend> -->
+
+  <exec_depend>rclcpp</exec_depend>
+  <exec_depend>std_msgs</exec_depend>  
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
