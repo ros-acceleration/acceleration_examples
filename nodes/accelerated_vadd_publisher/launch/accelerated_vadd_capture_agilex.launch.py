@@ -34,7 +34,7 @@ def generate_launch_description():
     return LaunchDescription(
         [
             Trace(
-                session_name="accelerated_vadd_capture",
+                session_name="accelerated_vadd_capture_agilex",
                 events_ust=[
                     "ros2_acceleration:vadd_pre",
                     "ros2_acceleration:vadd_post",
@@ -50,7 +50,7 @@ def generate_launch_description():
             ),
             Node(
                 package="accelerated_vadd_publisher",
-                executable="accelerated_vadd_publisher",
+                executable="accelerated_vadd_publisher_agilex",
                 # arguments=["do_more"],
                 output="screen",
             ),
