@@ -16,6 +16,8 @@ find_package(std_msgs REQUIRED)
 find_package(Threads REQUIRED)
 find_package(ament_vitis)
 find_package(ament_oneapi)
+find_package(tracetools REQUIRED)
+find_package(tracetools_acceleration REQUIRED)
 find_package(accelerated_doublevadd_publisher REQUIRED)
 
 if (ROS_ACCELERATION)
@@ -65,6 +67,12 @@ if (ROS_ACCELERATION)
         accelerated_vadd_publisher_agilex
       DESTINATION 
         lib/${PROJECT_NAME}
+    )
+
+    # Install launch files.
+    install(DIRECTORY
+    launch
+    DESTINATION share/${PROJECT_NAME}
     )
   endif()  # ROS_ONEAPI
 endif()  # ROS_ACCERATION

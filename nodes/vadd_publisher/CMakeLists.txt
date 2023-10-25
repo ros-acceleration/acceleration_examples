@@ -14,10 +14,12 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(ament_vitis)
+find_package(tracetools REQUIRED)
+find_package(tracetools_acceleration REQUIRED)
 
 add_executable(vadd_publisher src/vadd_publisher.cpp src/vadd.cpp)
 target_include_directories(vadd_publisher PUBLIC include)
-ament_target_dependencies(vadd_publisher rclcpp std_msgs)
+ament_target_dependencies(vadd_publisher rclcpp std_msgs tracetools tracetools_acceleration)
 
 if(ROS_ACCELERATION)
   if (ROS_VITIS)
@@ -52,5 +54,11 @@ if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+# Install launch files.
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
 
 ament_package()
