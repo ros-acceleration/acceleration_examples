@@ -16,6 +16,8 @@
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>  
   <depend>ament_vitis</depend>  
+  <depend>tracetools</depend>
+  <depend>tracetools_acceleration</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
