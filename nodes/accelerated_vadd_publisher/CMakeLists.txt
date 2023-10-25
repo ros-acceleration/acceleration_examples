@@ -69,12 +69,13 @@ if (ROS_ACCELERATION)
         lib/${PROJECT_NAME}
     )
 
-    # Install launch files.
-    install(DIRECTORY
-    launch
-    DESTINATION share/${PROJECT_NAME}
-    )
+
   endif()  # ROS_ONEAPI
 endif()  # ROS_ACCERATION
 
+# Install launch files.
+install(DIRECTORY
+launch
+DESTINATION share/${PROJECT_NAME}
+)
 ament_package()

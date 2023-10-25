@@ -21,6 +21,8 @@ See https://github.com/Xilinx/Vitis-Tutorials/blob/master/Getting_Started/Vitis
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "vadd.hpp"
+#include "tracetools/tracetools.h"
+#include "tracetools_acceleration/tracetools.h"
 
 #define DATA_SIZE 4096  // 2**12
 // #define DATA_SIZE 16384  // 2**14
@@ -71,8 +73,10 @@ int main(int argc, char * argv[]) {
         out[i] = 0;
     }
 
+    TRACEPOINT(vadd_pre, ("iteration: " + std::to_string(publish_count)).c_str());
     // Add vectors
     vadd(in1, in2, out, DATA_SIZE);  // function subject to be accelerated
+    TRACEPOINT(vadd_post, ("iteration: " + std::to_string(publish_count)).c_str());
 
     // Validate operation
     check_vadd(in1, in2, out);
