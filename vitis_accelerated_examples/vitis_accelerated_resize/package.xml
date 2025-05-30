@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
   <name>vitis_accelerated_resize</name>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
   <description>An example to showcase how to integrate Vitis Vision Library with KRS.
     Here in this example we are showcasing the integration of resize functions.
   </description>

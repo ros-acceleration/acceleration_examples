@@ -57,7 +57,11 @@ private:
  
     // Publish the image to the topic defined in the publisher
     publisher_->publish(*msg_.get());
-    RCLCPP_INFO(this->get_logger(), "Image %ld published", count_);
+    if(count_ % 20 == 0) // print after 20 images published
+    {			
+	    RCLCPP_INFO(this->get_logger(), "Image %ld published", count_);
+    }
+
     count_++;
   }
   rclcpp::TimerBase::SharedPtr timer_;

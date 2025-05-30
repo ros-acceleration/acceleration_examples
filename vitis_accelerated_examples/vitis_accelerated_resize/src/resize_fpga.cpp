@@ -46,7 +46,7 @@ std::vector<cl::Device> get_xilinx_devices();
 char* read_binary_file(const std::string &xclbin_file_name, unsigned &nb);
 
 
-#define XCLBIN_NAME "/lib/firmware/xilinx/resize_accel/resize_accel.xclbin"
+#define XCLBIN_NAME "/lib/firmware/xilinx/vitis_accelerated_resize/resize_accel.xclbin"
 #define KERNEL_NAME "resize_accel"
 
 void AcceleratedResize::InitKernel()
@@ -203,7 +203,7 @@ void AcceleratedResize::imageCb(const sensor_msgs::msg::Image::ConstSharedPtr & 
 	// with the Vitis Vision Library
 	// see http://wiki.ros.org/cv_bridge/Tutorials/UsingCvBridgeToConvertBetweenROSImagesAndOpenCVImages
 
-	std::cout << "INside imageCb function " << std::endl;
+	//std::cout << "INside imageCb function " << std::endl;
 
 	bool gray = (sensor_msgs::image_encodings::numChannels(image_msg->encoding) == 1);
 	try 
