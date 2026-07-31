@@ -35,13 +35,12 @@ int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
 
-  // rclcpp::executors::SingleThreadedExecutor exec;
-  rclcpp::executors::MultiThreadedExecutor exec;
-  rclcpp::NodeOptions options;
+  rclcpp::executors::SingleThreadedExecutor exec;
+  // rclcpp::executors::MultiThreadedExecutor exec;
   auto resize_node =
-    std::make_shared<image_proc::ResizeNodeFPGAStreamlinedXRT>(options);
+    std::make_shared<image_proc::ResizeNodeFPGAStreamlinedXRT>(rclcpp::NodeOptions());
   auto rectify_node =
-    std::make_shared<image_proc::RectifyNodeFPGAStreamlinedXRT>(options);
+    std::make_shared<image_proc::RectifyNodeFPGAStreamlinedXRT>(rclcpp::NodeOptions());
 
   exec.add_node(rectify_node);
   exec.add_node(resize_node);

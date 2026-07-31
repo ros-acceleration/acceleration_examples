@@ -88,7 +88,6 @@ def generate_launch_description():
     perception_node = Node(
         package="image_pipeline_examples",
         executable="rectify_resize_fpga_streamlined_node",
-        name="rectify_resize_fpga_streamlined_node",
         remappings=[
             ("image", "/camera/image_raw"),
             ("camera_info", "/camera/camera_info"),
